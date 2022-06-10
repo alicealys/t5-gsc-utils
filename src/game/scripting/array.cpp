@@ -4,6 +4,57 @@
 
 namespace scripting
 {
+	namespace
+	{
+		std::vector<script_value> get_keys_sp(unsigned int id)
+		{
+			std::vector<script_value> result;
+
+			auto current = game::scr_VarGlob->variableList_sp[id + 1].nextSibling;
+
+			while (current)
+			{
+				const auto var = &game::scr_VarGlob->variableList_sp[current + 0x6000];
+				const auto key_value = game::Scr_GetArrayIndexValue(game::SCRIPTINSTANCE_SERVER, var->w.status >> 8);
+				result.push_back(key_value);
+
+				const auto next_sibling = game::scr_VarGlob->variableList_sp[current + 0x6000].nextSibling;
+				if (!next_sibling)
+				{
+					break;
+				}
+
+				current = static_cast<unsigned __int16>(game::scr_VarGlob->variableList_sp[next_sibling + 0x6000].id);
+			}
+
+			return result;
+		}
+
+		std::vector<script_value> get_keys_mp(unsigned int id)
+		{
+			std::vector<script_value> result;
+
+			auto current = game::scr_VarGlob->variableList_mp[id + 1].nextSibling;
+
+			while (current)
+			{
+				const auto var = &game::scr_VarGlob->variableList_mp[current + 0x8000];
+				const auto key_value = game::Scr_GetArrayIndexValue(game::SCRIPTINSTANCE_SERVER, var->w.status >> 8);
+				result.push_back(key_value);
+
+				const auto next_sibling = game::scr_VarGlob->variableList_mp[current + 0x8000].nextSibling;
+				if (!next_sibling)
+				{
+					break;
+				}
+
+				current = game::scr_VarGlob->variableList_mp[next_sibling + 0x8000].hash.id;
+			}
+
+			return result;
+		}
+	}
+
 	array_value::array_value(unsigned int parent_id, unsigned int id)
 		: id_(id)
 		, parent_id_(parent_id)
@@ -13,12 +64,22 @@ namespace scripting
 			return;
 		}
 
-		const auto value = game::scr_VarGlob->variableList[this->id_];
-		game::VariableValue variable{};
-		variable.u = value.u.u;
-		variable.type = value.w.type & 0x1F;
+		game::VariableValue variable_{};
 
-		this->value_ = variable;
+		if (game::environment::is_sp())
+		{
+			const auto variable = &game::scr_VarGlob->variableList_sp[this->id_ + 0x6000];
+			variable_.type = variable->w.type & 0x1F;
+			variable_.u = variable->u.u;
+		}
+		else
+		{
+			const auto variable = &game::scr_VarGlob->variableList_mp[this->id_ + 0x8000];
+			variable_.type = variable->w.type & 0x1F;
+			variable_.u = variable->u.u;
+		}
+
+		this->value_ = variable_;
 	}
 
 	void array_value::operator=(const script_value& value)
@@ -30,16 +91,29 @@ namespace scripting
 
 		const auto& value_0 = value.get_raw();
 
-		const auto variable = &game::scr_VarGlob->variableList[this->id_];
-		game::VariableValue variable_{};
-		variable_.type = variable->w.type & 0x1F;
-		variable_.u = variable->u.u;
+		game::VariableValue previous{};
+
+		if (game::environment::is_sp())
+		{
+			const auto variable = &game::scr_VarGlob->variableList_sp[this->id_ + 0x6000];
+			previous.type = variable->w.type & 0x1F;
+			previous.u = variable->u.u;
+
+			variable->w.type |= value_0.type;
+			variable->u.u = value_0.u;
+		}
+		else
+		{
+			const auto variable = &game::scr_VarGlob->variableList_mp[this->id_ + 0x8000];
+			previous.type = variable->w.type & 0x1F;
+			previous.u = variable->u.u;
+
+			variable->w.type |= value_0.type;
+			variable->u.u = value_0.u;
+		}
 
 		game::AddRefToValue(game::SCRIPTINSTANCE_SERVER, &value_0);
-		game::RemoveRefToValue(game::SCRIPTINSTANCE_SERVER, variable_.type, variable_.u);
-
-		variable->w.type = value_0.type & 0x1F;
-		variable->u.u = value_0.u;
+		game::RemoveRefToValue(game::SCRIPTINSTANCE_SERVER, previous.type, previous.u);
 
 		this->value_ = value_0;
 	}
@@ -121,26 +195,7 @@ namespace scripting
 
 	std::vector<script_value> array::get_keys() const
 	{
-		std::vector<script_value> result;
-
-		auto current = game::scr_VarGlob->variableList[this->id_ + 1].nextSibling;
-
-		while (current)
-		{
-			const auto var = &game::scr_VarGlob->variableList[current + 0x8000];
-			const auto key_value = game::Scr_GetArrayIndexValue(game::SCRIPTINSTANCE_SERVER, var->w.status >> 8);
-			result.push_back(key_value);
-
-			const auto next_sibling = game::scr_VarGlob->variableList[current + 0x8000].nextSibling;
-			if (!next_sibling)
-			{
-				break;
-			}
-
-			current = game::scr_VarGlob->variableList[next_sibling + 0x8000].hash.id;
-		}
-
-		return result;
+		return SELECT_VALUE(get_keys_sp, get_keys_mp)(this->id_);
 	}
 
 	int array::size() const
@@ -190,12 +245,22 @@ namespace scripting
 			return {};
 		}
 
-		const auto value = game::scr_VarGlob->variableList[variable_id + 0x8000];
-		game::VariableValue variable{};
-		variable.u = value.u.u;
-		variable.type = value.w.type & 0x1F;
+		game::VariableValue variable_{};
 
-		return variable;
+		if (game::environment::is_sp())
+		{
+			const auto variable = &game::scr_VarGlob->variableList_sp[variable_id + 0x6000];
+			variable_.type = variable->w.type & 0x1F;
+			variable_.u = variable->u.u;
+		}
+		else
+		{
+			const auto variable = &game::scr_VarGlob->variableList_mp[variable_id + 0x8000];
+			variable_.type = variable->w.type & 0x1F;
+			variable_.u = variable->u.u;
+		}
+
+		return variable_;
 	}
 
 	script_value array::get(const unsigned int index) const
@@ -207,12 +272,22 @@ namespace scripting
 			return {};
 		}
 
-		const auto value = game::scr_VarGlob->variableList[variable_id + 0x8000];
-		game::VariableValue variable{};
-		variable.u = value.u.u;
-		variable.type = value.w.type & 0x1F;
+		game::VariableValue variable_{};
 
-		return variable;
+		if (game::environment::is_sp())
+		{
+			const auto variable = &game::scr_VarGlob->variableList_sp[variable_id + 0x6000];
+			variable_.type = variable->w.type & 0x1F;
+			variable_.u = variable->u.u;
+		}
+		else
+		{
+			const auto variable = &game::scr_VarGlob->variableList_mp[variable_id + 0x8000];
+			variable_.type = variable->w.type & 0x1F;
+			variable_.u = variable->u.u;
+		}
+
+		return variable_;
 	}
 
 	script_value array::get(const script_value& key) const
@@ -240,16 +315,29 @@ namespace scripting
 			return;
 		}
 
-		const auto variable = &game::scr_VarGlob->variableList[variable_id + 0x8000];
-		game::VariableValue variable_{};
-		variable_.type = variable->w.type & 0x1F;
-		variable_.u = variable->u.u;
+		game::VariableValue previous{};
+
+		if (game::environment::is_sp())
+		{
+			const auto variable = &game::scr_VarGlob->variableList_sp[variable_id + 0x6000];
+			previous.type = variable->w.type & 0x1F;
+			previous.u = variable->u.u;
+
+			variable->w.type |= value_.type;
+			variable->u.u = value_.u;
+		}
+		else
+		{
+			const auto variable = &game::scr_VarGlob->variableList_mp[variable_id + 0x8000];
+			previous.type = variable->w.type & 0x1F;
+			previous.u = variable->u.u;
+
+			variable->w.type |= value_.type;
+			variable->u.u = value_.u;
+		}
 
 		game::AddRefToValue(game::SCRIPTINSTANCE_SERVER, &value_);
-		game::RemoveRefToValue(game::SCRIPTINSTANCE_SERVER, variable_.type, variable_.u);
-
-		variable->w.type |= value_.type;
-		variable->u.u = value_.u;
+		game::RemoveRefToValue(game::SCRIPTINSTANCE_SERVER, previous.type, previous.u);
 	}
 
 	void array::set(const unsigned int index, const script_value& value) const
@@ -262,17 +350,29 @@ namespace scripting
 			return;
 		}
 
-		auto variable_list = *game::scr_VarGlob;
-		const auto variable = &game::scr_VarGlob->variableList[variable_id + 0x8000];
-		game::VariableValue variable_{};
-		variable_.type = variable->w.type & 0x1F;
-		variable_.u = variable->u.u;
+		game::VariableValue previous{};
+
+		if (game::environment::is_sp())
+		{
+			const auto variable = &game::scr_VarGlob->variableList_sp[variable_id + 0x6000];
+			previous.type = variable->w.type & 0x1F;
+			previous.u = variable->u.u;
+
+			variable->w.type |= value_.type;
+			variable->u.u = value_.u;
+		}
+		else
+		{
+			const auto variable = &game::scr_VarGlob->variableList_mp[variable_id + 0x8000];
+			previous.type = variable->w.type & 0x1F;
+			previous.u = variable->u.u;
+
+			variable->w.type |= value_.type;
+			variable->u.u = value_.u;
+		}
 
 		game::AddRefToValue(game::SCRIPTINSTANCE_SERVER, &value_);
-		game::RemoveRefToValue(game::SCRIPTINSTANCE_SERVER, variable_.type, variable_.u);
-
-		variable->w.type |= value_.type;
-		variable->u.u = value_.u;
+		game::RemoveRefToValue(game::SCRIPTINSTANCE_SERVER, previous.type, previous.u);
 	}
 
 	void array::set(const script_value& key, const script_value& _value) const

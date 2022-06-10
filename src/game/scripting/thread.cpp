@@ -7,7 +7,7 @@ namespace scripting
 {
 	thread::thread(unsigned int id)
 		: id_(id)
-		 , type_(game::scr_VarGlob->variableList[id].w.type & 0x7F)
+		 , type_(game::GetObjectType(game::SCRIPTINSTANCE_SERVER, id))
 	{
 	}
 
@@ -32,12 +32,12 @@ namespace scripting
 
 	unsigned int thread::get_wait_time() const
 	{
-		return game::scr_VarGlob->variableList[this->id_].w.waitTime >> 8;
+		return 0;
 	}
 
 	unsigned int thread::get_notify_name_id() const
 	{
-		return game::scr_VarGlob->variableList[this->id_].w.notifyName >> 8;
+		return 0;
 	}
 
 	unsigned int thread::get_self() const

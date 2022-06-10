@@ -169,7 +169,7 @@ namespace gsc
         utils::hook::detour scr_settings_hook;
         void scr_settings_stub(int /*developer*/, int developer_script, int /*abort_on_error*/, int inst)
         {
-            scr_settings_hook.invoke<void>(SELECT_VALUE(0x0, 0x55D010), developer_script, developer_script, 0, inst);
+            scr_settings_hook.invoke<void>(developer_script, developer_script, 0, inst);
         }
     }
 
@@ -177,20 +177,21 @@ namespace gsc
     {
         void add_internal(const std::string& name, const function_t& function)
         {
-            functions[name] = function;
-            const auto call_wrap = wrap_function_call(name);
-            function_wraps[name] = call_wrap;
+            const auto name_ = utils::string::to_lower(name);
+            functions[name_] = function;
+            const auto call_wrap = wrap_function_call(name_);
+            function_wraps[name_] = call_wrap;
         }
     }
 
     namespace method
     {
-        template <typename F>
         void add_internal(const std::string& name, const function_t& method)
         {
-            methods[name] = method;
-            const auto call_wrap = wrap_method_call(name);
-            method_wraps[name] = call_wrap;
+            const auto name_ = utils::string::to_lower(name);
+            methods[name_] = method;
+            const auto call_wrap = wrap_method_call(name_);
+            method_wraps[name_] = call_wrap;
         }
     }
 
@@ -200,16 +201,16 @@ namespace gsc
         void post_unpack() override
         {
             // Don't com_error on gsc errors
-            utils::hook::nop(SELECT_VALUE(0x0, 0x4D9BB1), 5);
-            utils::hook::jump(SELECT_VALUE(0x0, 0x568B90), print);
+            utils::hook::nop(SELECT_VALUE(0x5A17E1, 0x4D9BB1), 5);
+            utils::hook::jump(SELECT_VALUE(0x5DFC40, 0x568B90), print);
 
-            scr_settings_hook.create(SELECT_VALUE(0x0, 0x55D010), scr_settings_stub);
-            get_function_hook.create(SELECT_VALUE(0x0, 0x465E20), get_function_stub);
-            get_method_hook.create(SELECT_VALUE(0x0, 0x555580), get_method_stub);
+            scr_settings_hook.create(SELECT_VALUE(0x4CEEA0, 0x55D010), scr_settings_stub);
+            get_function_hook.create(SELECT_VALUE(0x52BF80, 0x465E20), get_function_stub);
+            get_method_hook.create(SELECT_VALUE(0x68A640, 0x555580), get_method_stub);
 
             // \n******* script runtime error *******\n%s\n
-            utils::hook::set<char>(0xAABA68 + 40, '\n');
-            utils::hook::set<char>(0xAABA68 + 41, '\0');
+            utils::hook::set<char>(SELECT_VALUE(0x9FC5C0 + 40, 0xAABA68 + 40), '\n');
+            utils::hook::set<char>(SELECT_VALUE(0x9FC5C0 + 41, 0xAABA68 + 41), '\0');
         }
     };
 }

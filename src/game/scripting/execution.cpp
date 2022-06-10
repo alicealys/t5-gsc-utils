@@ -149,12 +149,6 @@ namespace scripting
 
 	unsigned int make_object()
 	{
-		unsigned int index = 0;
-		const auto id = game::AllocVariable(game::SCRIPTINSTANCE_SERVER);
-		const auto variable = &game::scr_VarGlob->variableList[id + 1];
-		variable->w.type = game::SCRIPT_STRUCT;
-		variable->u.o.refCount = 0;
-
-		return index;
+		return 0;
 	}
 }

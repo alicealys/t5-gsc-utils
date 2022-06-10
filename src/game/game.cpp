@@ -27,6 +27,34 @@ namespace game
 		AddRefToValue_(inst, value->type, value->u);
 	}
 
+	void RemoveRefToValue(scriptInstance_t inst, const int type, VariableUnion value)
+	{
+		if (game::environment::is_mp())
+		{
+			mp::RemoveRefToValue(inst, type, value);
+		}
+		else
+		{
+			game::VariableValue var{};
+			var.type = type;
+			var.u = value;
+
+			sp::RemoveRefToValue(inst, &var);
+		}
+	}
+
+	unsigned int GetObjectType(scriptInstance_t, unsigned int id)
+	{
+		if (game::environment::is_sp())
+		{
+			return game::scr_VarGlob->variableList_sp[id + 1].w.type & 0x1F;
+		}
+		else
+		{
+			return game::scr_VarGlob->variableList_mp[id + 1].w.type & 0x1F;
+		}
+	}
+
 	unsigned int AllocVariable(scriptInstance_t inst)
 	{
 		static const auto func = utils::hook::assemble([](utils::hook::assembler& a)
@@ -67,16 +95,13 @@ namespace game
 
 	unsigned int Scr_GetSelf(scriptInstance_t, unsigned int threadId)
 	{
-		return game::scr_VarGlob->variableList[threadId + 1].u.o.u.self;
-	}
-
-	namespace plutonium
-	{
-		bool is_up_to_date()
+		if (game::environment::is_sp())
 		{
-			//const auto value = *reinterpret_cast<DWORD*>(0);
-			//return value == 0;
-			return false;
+			return game::scr_VarGlob->variableList_sp[threadId + 1].u.o.size;
+		}
+		else
+		{
+			return game::scr_VarGlob->variableList_mp[threadId + 1].u.o.u.self;
 		}
 	}
 }

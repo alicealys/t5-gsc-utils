@@ -258,7 +258,7 @@ namespace scripting
 		}
 
 		const auto id = this->get_raw().u.uintValue;
-		const auto type = game::scr_VarGlob->variableList[id + 1].w.type & 0x1F;
+		const auto type = game::GetObjectType(game::SCRIPTINSTANCE_SERVER, id);
 
 		return type == game::SCRIPT_ARRAY;
 	}
@@ -282,7 +282,7 @@ namespace scripting
 		}
 
 		const auto id = this->get_raw().u.uintValue;
-		const auto type = game::scr_VarGlob->variableList[id + 1].w.type & 0x1F;
+		const auto type = game::GetObjectType(game::SCRIPTINSTANCE_SERVER, id);
 
 		return type == game::SCRIPT_STRUCT || type == game::SCRIPT_ENTITY;
 	}

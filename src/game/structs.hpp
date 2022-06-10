@@ -210,23 +210,51 @@ namespace game
 		unsigned int index;
 	};
 
-	struct VariableValueInternal
+	namespace sp
 	{
-		Variable hash;
-		VariableValueInternal_u u;
-		VariableValueInternal_w w;
-		VariableValueInternal_v v;
-		unsigned int nextSibling;
-	};
+		struct ObjectInfo
+		{
+			unsigned __int16 refCount;
+			unsigned __int16 size;
+		};
 
-	static_assert(sizeof(VariableValueInternal) == 28);
-	static_assert(offsetof(VariableValueInternal, hash) == 0);
-	static_assert(offsetof(VariableValueInternal, u) == 8);
-	static_assert(offsetof(VariableValueInternal, w) == 16);
+		union VariableValueInternal_u
+		{
+			VariableUnion u;
+			ObjectInfo o;
+		};
 
-	struct scrVarGlob_t
+		struct VariableValueInternal
+		{
+			unsigned int id;
+			VariableValueInternal_u u;
+			VariableValueInternal_w w;
+			char __pad1[2];
+			unsigned __int16 nextSibling;
+		};
+
+		static_assert(sizeof(VariableValueInternal) == 16);
+		static_assert(offsetof(VariableValueInternal, nextSibling) == 14);
+		static_assert(offsetof(VariableValueInternal, u) == 4);
+		static_assert(offsetof(VariableValueInternal, w) == 8);
+	}
+
+	namespace mp
 	{
-		VariableValueInternal* variableList;
+		struct VariableValueInternal
+		{
+			Variable hash;
+			VariableValueInternal_u u;
+			VariableValueInternal_w w;
+			VariableValueInternal_v v;
+			unsigned int nextSibling;
+		};
+	}
+
+	union scrVarGlob_t
+	{
+		sp::VariableValueInternal* variableList_sp;
+		mp::VariableValueInternal* variableList_mp;
 	};
 
 	struct scr_classStruct_t
