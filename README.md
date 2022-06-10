@@ -54,16 +54,16 @@ If you wish for any feature to be added please create an [issue](https://github.
 
       for (i = 0; i < arr.size; i++)
       {
-          print_(arr[i]);
+          print(arr[i]);
       }
 
-      print_();
+      print();
 
       arr = sort(arr);
     
       for (i = 0; i < arr.size; i++)
       {
-        print_(arr[i]);
+        print(arr[i]);
       }
   }
   ```
