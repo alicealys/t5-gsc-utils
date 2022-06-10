@@ -330,6 +330,18 @@ namespace scripting
 	 *
 	 **********************************************/
 
+	template <>
+	bool script_value::is<script_value>() const
+	{
+		return true;
+	}
+
+	template <>
+	script_value script_value::get() const
+	{
+		return this;
+	}
+
 	const game::VariableValue& script_value::get_raw() const
 	{
 		return this->value_.get();
@@ -372,11 +384,13 @@ namespace scripting
 		return this->type_name();
 	}
 
-	function_argument::function_argument(const arguments& args, const script_value& value, const int index)
+	function_argument::function_argument(const arguments& args, const script_value& value, const int index, const bool exists)
 		: values_(args)
-		, value_(value)
-		, index_(index)
+		  , value_(value)
+		  , index_(index)
+		  , exists_(exists)
 	{
+
 	}
 
 	function_arguments::function_arguments(const arguments& values)

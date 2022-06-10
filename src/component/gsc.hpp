@@ -2,24 +2,24 @@
 #include "game/scripting/array.hpp"
 #include "game/scripting/execution.hpp"
 
-namespace scripting
+namespace gsc
 {
 	using script_function = void(*)(game::scr_entref_t);
 
 	template <class... Args, std::size_t... I>
 	auto wrap_function(const std::function<void(Args...)>& f, std::index_sequence<I...>)
 	{
-		return [f]([[maybe_unused]] const function_arguments& args)
+		return [f]([[maybe_unused]] const scripting::function_arguments& args)
 		{
 			f(args[I]...);
-			return script_value{};
+			return scripting::script_value{};
 		};
 	}
 
 	template <class... Args, std::size_t... I>
-	auto wrap_function(const std::function<script_value(Args...)>& f, std::index_sequence<I...>)
+	auto wrap_function(const std::function<scripting::script_value(Args...)>& f, std::index_sequence<I...>)
 	{
-		return [f]([[maybe_unused]] const function_arguments& args)
+		return [f]([[maybe_unused]] const scripting::function_arguments& args)
 		{
 			return f(args[I]...);
 		};
@@ -28,9 +28,9 @@ namespace scripting
 	template <typename R, class... Args, std::size_t... I>
 	auto wrap_function(const std::function<R(Args...)>& f, std::index_sequence<I...>)
 	{
-		return [f]([[maybe_unused]] const function_arguments& args)
+		return [f]([[maybe_unused]] const scripting::function_arguments& args)
 		{
-			return script_value{f(args[I]...)};
+			return scripting::script_value{f(args[I]...)};
 		};
 	}
 
@@ -46,9 +46,15 @@ namespace scripting
 		return wrap_function(std::function(f));
 	}
 
-	template <typename F>
-	void add_function(const std::string& name, F f);
+	namespace function
+	{
+		template <typename F>
+		void add(const std::string& name, F f);
+	}
 
-	template <typename F>
-	void add_method(const std::string& name, F f);
+	namespace method
+	{
+		template <typename F>
+		void add(const std::string& name, F f);
+	}
 }

@@ -143,9 +143,9 @@ namespace scripting
 		return result;
 	}
 
-	unsigned int array::size() const
+	int array::size() const
 	{
-		return game::Scr_GetSelf(game::SCRIPTINSTANCE_SERVER, this->id_);
+		return static_cast<int>(game::Scr_GetSelf(game::SCRIPTINSTANCE_SERVER, this->id_));
 	}
 
 	unsigned int array::push(const script_value& value) const
