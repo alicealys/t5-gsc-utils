@@ -134,11 +134,6 @@ namespace gsc
 
         script_function get_function_stub(const char** name, int* type)
         {
-            if (*name == "print"s)
-            {
-                MessageBoxA(nullptr, "", "", 0);
-            }
-
             if (function_wraps.find(*name) != function_wraps.end())
             {
                 return reinterpret_cast<script_function>(function_wraps[*name]);

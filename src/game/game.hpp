@@ -35,22 +35,8 @@ namespace game
 		{
 			if (environment::is_mp())
 			{
-#ifdef DEBUG
-				if (mp_object_ == nullptr)
-				{
-					MessageBoxA(nullptr, "nullptr symbol", "", 0);
-				}
-#endif
-
 				return mp_object_;
 			}
-
-#ifdef DEBUG
-			if (sp_object_ == nullptr)
-			{
-				MessageBoxA(nullptr, "nullptr symbol", "", 0);
-			}
-#endif
 
 			return sp_object_;
 		}
