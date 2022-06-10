@@ -58,7 +58,6 @@ namespace scripting
 				return typenames[type_];
 			}
 
-			printf("UNKNOWN TYPE %i\n", type_);
 			return "unknown";
 		}
 
@@ -134,8 +133,52 @@ namespace scripting
 
 		script_value(const vector& value);
 
+	private:
 		template <typename T>
-		bool is() const;
+		T get() const
+		{
+			if (std::is_constructible<T, std::string>::value && this->is<std::string>()) \
+			{
+				return T(this->as<std::string>());
+			}
+
+			throw std::runtime_error("Invalid type");
+		}
+	public:
+
+#define ADD_TYPE(type) \
+		template <> \
+		bool is<type>() const; \
+private: \
+		template <> \
+		type get<>() const; \
+public: \
+
+		template <typename T>
+		bool is() const
+		{
+			if (std::is_constructible<T, std::string>::value && this->is<std::string>()) \
+			{
+				return true;
+			}
+
+			return false;
+		}
+
+		ADD_TYPE(bool)
+		ADD_TYPE(int)
+		ADD_TYPE(unsigned int)
+		ADD_TYPE(float)
+		ADD_TYPE(double)
+		ADD_TYPE(const char*)
+		ADD_TYPE(std::string)
+
+		ADD_TYPE(vector)
+		ADD_TYPE(array)
+		ADD_TYPE(object)
+		ADD_TYPE(function)
+		ADD_TYPE(entity)
+		ADD_TYPE(script_value)
 
 		template <typename T>
 		T as() const
@@ -183,10 +226,6 @@ namespace scripting
 		const game::VariableValue& get_raw() const;
 
 		variable_value value_{};
-
-	private:
-		template <typename T>
-		T get() const;
 
 	};
 
