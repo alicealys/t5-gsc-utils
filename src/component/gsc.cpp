@@ -210,6 +210,10 @@ namespace gsc
             get_function_hook.create(SELECT_VALUE(0x0, 0x465E20), get_function_stub);
             get_method_hook.create(SELECT_VALUE(0x0, 0x555580), get_method_stub);
 
+            // \n******* script runtime error *******\n%s\n
+            utils::hook::set<char>(0xAABA68 + 40, '\n');
+            utils::hook::set<char>(0xAABA68 + 41, '\0');
+
             function::add("print_", [](const scripting::variadic_args& va)
             {
                 for (const auto& arg : va)

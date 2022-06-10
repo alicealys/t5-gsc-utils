@@ -42,7 +42,7 @@ namespace exception
 
             utils::thread::suspend_other_threads();
             show_mouse_cursor();
-            MessageBoxA(nullptr, error_str.data(), "Plutonium T6 ERROR", MB_ICONERROR);
+            MessageBoxA(nullptr, error_str.data(), "Plutonium T5 ERROR", MB_ICONERROR);
             TerminateProcess(GetCurrentProcess(), exception_data.code);
         }
 
@@ -72,7 +72,7 @@ namespace exception
                 info.append("\r\n");
             };
 
-            line("Plutonium T6 Crash Dump");
+            line("Plutonium T5 Crash Dump");
             line("");
             line("Timestamp: "s + utils::string::get_timestamp());
             line(utils::string::va("Exception: 0x%08X", exceptioninfo->ExceptionRecord->ExceptionCode));
@@ -93,13 +93,13 @@ namespace exception
 
         void write_minidump(const LPEXCEPTION_POINTERS exceptioninfo)
         {
-            const std::string crash_name = utils::string::va("minidumps/plutonium-t6-crash-%s.zip",
+            const std::string crash_name = utils::string::va("minidumps/plutonium-t5-crash-%s.zip",
                                                              utils::string::get_timestamp().data());
 
             utils::compression::zip::archive zip_file{};
             zip_file.add("crash.dmp", create_minidump(exceptioninfo));
             zip_file.add("info.txt", generate_crash_info(exceptioninfo));
-            zip_file.write(crash_name, "Plutonium T6 Crash Dump");
+            zip_file.write(crash_name, "Plutonium T5 Crash Dump");
         }
 
         bool is_harmless_error(const LPEXCEPTION_POINTERS exceptioninfo)
@@ -136,8 +136,10 @@ namespace exception
     public:
         void post_unpack() override
         {
+#ifdef DEBUG
             SetUnhandledExceptionFilter(exception_filter);
             utils::hook::jump(reinterpret_cast<uintptr_t>(&SetUnhandledExceptionFilter), set_unhandled_exception_filter_stub);
+#endif
         }
     };
 }

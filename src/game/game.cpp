@@ -39,7 +39,7 @@ namespace game
 		return utils::hook::invoke<unsigned int>(func, inst);
 	}
 
-	VariableValue Scr_GetArrayIndexValue(scriptInstance_t inst, unsigned int name)
+	VariableValue Scr_GetArrayIndexValue(scriptInstance_t, unsigned int name)
 	{
 		VariableValue value{};
 
@@ -65,7 +65,7 @@ namespace game
 		return value;
 	}
 
-	unsigned int Scr_GetSelf(scriptInstance_t inst, unsigned int threadId)
+	unsigned int Scr_GetSelf(scriptInstance_t, unsigned int threadId)
 	{
 		return game::scr_VarGlob->variableList[threadId + 1].u.o.u.self;
 	}
