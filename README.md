@@ -57,7 +57,7 @@ If you wish for any feature to be added please create an [issue](https://github.
           print(arr[i]);
       }
 
-      print();
+      print("");
 
       arr = sort(arr);
     
