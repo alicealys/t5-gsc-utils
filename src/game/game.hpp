@@ -57,15 +57,14 @@ namespace game
 	};
 
 	void AddRefToValue(scriptInstance_t inst, const VariableValue* value);
+	void RemoveRefToValue(scriptInstance_t inst, const int type, VariableUnion value);
+
+	unsigned int GetObjectType(scriptInstance_t, unsigned int id);
+
 	unsigned int AllocVariable(scriptInstance_t inst);
 
 	VariableValue Scr_GetArrayIndexValue(scriptInstance_t inst, unsigned int name);
 	unsigned int Scr_GetSelf(scriptInstance_t inst, unsigned int threadId);
-
-	namespace plutonium
-	{
-		bool is_up_to_date();
-	}
 }
 
 #include "symbols.hpp"

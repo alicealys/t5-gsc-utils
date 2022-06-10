@@ -46,7 +46,7 @@ namespace scripting
 			auto type_ = 0;
 			if (value.type == game::SCRIPT_OBJECT)
 			{
-				type_ = game::scr_VarGlob->variableList[value.u.uintValue].w.type & 0x1F;
+				type_ = game::GetObjectType(game::SCRIPTINSTANCE_SERVER, value.u.uintValue);
 			}
 			else
 			{
