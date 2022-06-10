@@ -14,6 +14,15 @@
 
 namespace scripting
 {
+	std::unordered_map<int, std::unordered_map<std::string, int>> fields_table;
+
+	std::unordered_map<std::string, game::BuiltinMethodDef> method_map;
+	std::unordered_map<std::string, game::BuiltinFunctionDef> function_map;
+
+	std::unordered_map<std::string, std::unordered_map<std::string, const char*>> script_function_table;
+	std::unordered_map<std::string, std::vector<std::pair<std::string, const char*>>> script_function_table_sort;
+	std::unordered_map<const char*, std::pair<std::string, std::string>> script_function_table_rev;
+
 	namespace
 	{
 		utils::hook::detour g_shutdown_game_hook;
