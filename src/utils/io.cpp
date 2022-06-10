@@ -120,4 +120,16 @@ namespace utils::io
 	{
 		std::filesystem::copy(src, target, std::filesystem::copy_options::overwrite_existing | std::filesystem::copy_options::recursive);
 	}
+
+	size_t remove_directory(const std::filesystem::path& src, bool recursive)
+	{
+		if (recursive)
+		{
+			return static_cast<size_t>(std::filesystem::remove_all(src));
+		}
+		else
+		{
+			return static_cast<size_t>(std::filesystem::remove(src));
+		}
+	}
 }

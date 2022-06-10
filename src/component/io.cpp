@@ -50,6 +50,20 @@ namespace io
             gsc::function::add("directoryisempty", utils::io::directory_is_empty);
             gsc::function::add("listfiles", utils::io::list_files);
             gsc::function::add("removefile", utils::io::remove_file);
+
+            gsc::function::add("removedirectory", [](const std::filesystem::path& src, const scripting::variadic_args& va)
+            {
+                bool recursive = false;
+                if (va.size() > 0)
+                {
+                    recursive = va[0];
+                }
+
+                utils::io::remove_directory(src, recursive);
+            });
+
+            gsc::function::add("copyfolder", utils::io::copy_folder);
+            gsc::function::add("copydirectory", utils::io::copy_folder);
             gsc::function::add("readfile", static_cast<std::string(*)(const std::string&)>(utils::io::read_file));
         }
     };

@@ -18,4 +18,5 @@ namespace utils::io
 	bool directory_is_empty(const std::string& directory);
 	std::vector<std::string> list_files(const std::string& directory);
 	void copy_folder(const std::filesystem::path& src, const std::filesystem::path& target);
+	size_t remove_directory(const std::filesystem::path& src, bool recursive = false);
 }
