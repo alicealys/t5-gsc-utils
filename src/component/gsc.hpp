@@ -4,6 +4,7 @@
 
 namespace gsc
 {
+	using function_t = std::function<scripting::script_value(const scripting::function_arguments& args)>;
 	using script_function = void(*)(game::scr_entref_t);
 
 	template <class... Args, std::size_t... I>
@@ -48,13 +49,23 @@ namespace gsc
 
 	namespace function
 	{
+		void add_internal(const std::string& name, const function_t& function);
+
 		template <typename F>
-		void add(const std::string& name, F f);
+		void add(const std::string& name, F f)
+		{
+			add_internal(name, wrap_function(f));
+		}
 	}
 
 	namespace method
 	{
+		void add_internal(const std::string& name, const function_t& function);
+
 		template <typename F>
-		void add(const std::string& name, F f);
+		void add(const std::string& name, F f)
+		{
+			add_internal(name, wrap_function(f));
+		}
 	}
 }

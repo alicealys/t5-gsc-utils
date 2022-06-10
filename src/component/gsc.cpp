@@ -20,8 +20,8 @@ namespace gsc
         utils::hook::detour get_function_hook;
         utils::hook::detour get_method_hook;
 
-        std::unordered_map<std::string, std::function<scripting::script_value(const scripting::function_arguments& args)>> functions;
-        std::unordered_map<std::string, std::function<scripting::script_value(const scripting::function_arguments& args)>> methods;
+        std::unordered_map<std::string, function_t> functions;
+        std::unordered_map<std::string, function_t> methods;
 
         std::unordered_map<std::string, void*> function_wraps;
         std::unordered_map<std::string, void*> method_wraps;
@@ -175,11 +175,9 @@ namespace gsc
 
     namespace function
     {
-        template <typename F>
-        void add(const std::string& name, F f)
+        void add_internal(const std::string& name, const function_t& function)
         {
-            const auto wrap = wrap_function(f);
-            functions[name] = wrap;
+            functions[name] = function;
             const auto call_wrap = wrap_function_call(name);
             function_wraps[name] = call_wrap;
         }
@@ -188,10 +186,9 @@ namespace gsc
     namespace method
     {
         template <typename F>
-        void add(const std::string& name, F f)
+        void add_internal(const std::string& name, const function_t& method)
         {
-            const auto wrap = wrap_function(f);
-            methods[name] = wrap;
+            methods[name] = method;
             const auto call_wrap = wrap_method_call(name);
             method_wraps[name] = call_wrap;
         }
@@ -213,43 +210,6 @@ namespace gsc
             // \n******* script runtime error *******\n%s\n
             utils::hook::set<char>(0xAABA68 + 40, '\n');
             utils::hook::set<char>(0xAABA68 + 41, '\0');
-
-            function::add("print_", [](const scripting::variadic_args& va)
-            {
-                for (const auto& arg : va)
-                {
-                    printf("%s\t", arg.to_string().data());
-                }
-                printf("\n");
-            });
-
-            function::add("writefile", [](const std::string& file, const std::string& data,
-                const scripting::variadic_args& va)
-            {
-                auto append = false;
-
-                if (va.size() > 0)
-                {
-                    append = va[0];
-                }
-
-                return utils::io::write_file(file, data, append);
-            });
-
-            function::add("appendfile", [](const std::string& file, const std::string& data)
-            {
-                return utils::io::write_file(file, data, true);
-            });
-
-            function::add("fileexists", utils::io::file_exists);
-            function::add("movefile", utils::io::move_file);
-            function::add("filesize", utils::io::file_size);
-            function::add("createdirectory", utils::io::create_directory);
-            function::add("directoryexists", utils::io::directory_exists);
-            function::add("directoryisempty", utils::io::directory_is_empty);
-            function::add("listfiles", utils::io::list_files);
-            function::add("removefile", utils::io::remove_file);
-            function::add("readfile", static_cast<std::string(*)(const std::string&)>(utils::io::read_file));
         }
     };
 }
