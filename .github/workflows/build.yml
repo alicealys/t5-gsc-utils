@@ -44,12 +44,4 @@ jobs:
         with:
           name: ${{matrix.configuration}} binaries
           path: |
-            build/bin/x86/${{matrix.configuration}}/t5-gsc-utils.exe
-            build/bin/x86/${{matrix.configuration}}/t5-gsc-utils.pdb
-            
-      - name: Upload ${{matrix.configuration}} data artifacts
-        uses: actions/upload-artifact@v2
-        with:
-          name: ${{matrix.configuration}} data artifacts
-          path: |
-            data/*
+            build/bin/${{matrix.configuration}}/t5-gsc-utils.dll
