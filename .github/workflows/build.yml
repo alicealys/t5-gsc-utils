@@ -37,7 +37,7 @@ jobs:
         uses: ammaraskar/msvc-problem-matcher@master
 
       - name: Build ${{matrix.configuration}} binaries
-        run: msbuild /m /v:minimal /p:Configuration=${{matrix.configuration}} /p:Platform=x86 build/t5-gsc-utils.sln
+        run: msbuild /m /v:minimal /p:Configuration=${{matrix.configuration}} /p:PlatformTarget=x86 build/t5-gsc-utils.sln
 
       - name: Upload ${{matrix.configuration}} binaries
         uses: actions/upload-artifact@v2

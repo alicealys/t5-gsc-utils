@@ -23,7 +23,7 @@ namespace utils::http
 			{
 				if (*helper->callback)
 				{
-					(*helper->callback)(dlnow);
+					(*helper->callback)(static_cast<size_t>(dlnow));
 				}
 			}
 			catch (...)
