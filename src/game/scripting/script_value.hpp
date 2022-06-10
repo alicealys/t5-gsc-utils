@@ -144,7 +144,7 @@ namespace scripting
 			{
 				const auto type = get_typename(this->get_raw());
 				const auto c_type = get_c_typename<T>();
-				throw std::runtime_error(std::string("has type '" + type + "' but should be '" + c_type + "'"));
+				throw std::runtime_error(utils::string::va("has type '%s' but should be '%s'", type.data(), c_type.data()));
 			}
 
 			return get<T>();
@@ -190,18 +190,22 @@ namespace scripting
 
 	};
 
-	class variadic_args : public arguments
-	{
-	};
+	class function_argument;
+	using variadic_args = std::vector<function_argument>;
 
 	class function_argument
 	{
 	public:
-		function_argument(const arguments& args, const script_value& value, const int index);
+		function_argument(const arguments& args, const script_value& value, const int index, const bool exists);
 
 		template <typename T>
 		T as() const
 		{
+			if (!this->exists_)
+			{
+				throw std::runtime_error(utils::string::va("parameter %d does not exist", this->index_));
+			}
+
 			try
 			{
 				return this->value_.as<T>();
@@ -209,7 +213,7 @@ namespace scripting
 			catch (const std::exception& e)
 			{
 				throw std::runtime_error(utils::string::va("parameter %d %s",
-					this->index_ + 1, e.what()));
+					this->index_, e.what()));
 			}
 		}
 
@@ -219,15 +223,66 @@ namespace scripting
 			variadic_args args{};
 			for (auto i = this->index_; i < static_cast<int>(this->values_.size()); i++)
 			{
-				args.push_back(this->values_[i]);
+				args.push_back({this->values_, this->values_[i], i, true});
 			}
 			return args;
 		}
 
-		template <>
-		script_value as() const
+		std::string to_string() const
+		{
+			return this->value_.to_string();
+		}
+
+		std::string type_name() const
+		{
+			return this->value_.type_name();
+		}
+
+		script_value get_raw() const
 		{
 			return this->value_;
+		}
+
+		operator variadic_args() const
+		{
+			variadic_args args{};
+			for (auto i = this->index_; i < static_cast<int>(this->values_.size()); i++)
+			{
+				args.push_back({this->values_, this->values_[i], i, true});
+			}
+			return args;
+		}
+
+		template <template<class, class> class C, class T, class ArrayType = array>
+		operator C<T, std::allocator<T>>() const
+		{
+			const auto container_type = get_c_typename<C<T, std::allocator<T>>>();
+			if (!this->value_.is<array>())
+			{
+				const auto type = get_typename(this->value_.get_raw());
+
+				throw std::runtime_error(utils::string::va("has type '%s' but should be '%s'",
+					type.data(),
+					container_type.data()
+				));
+			}
+
+			C<T, std::allocator<T>> container{};
+			const auto array = this->value_.as<ArrayType>();
+			for (auto i = 0; i < array.size(); i++)
+			{
+				try
+				{
+					container.push_back(array.get(i).as<T>());
+				}
+				catch (const std::exception& e)
+				{
+					throw std::runtime_error(utils::string::va("element %d of parameter %d of type '%s' %s", 
+						i, this->index_, container_type.data(), e.what()));
+				}
+			}
+
+			return container;
 		}
 
 		template <typename T>
@@ -240,6 +295,7 @@ namespace scripting
 		arguments values_{};
 		script_value value_{};
 		int index_{};
+		bool exists_{};
 	};
 
 	class function_arguments
@@ -251,10 +307,10 @@ namespace scripting
 		{
 			if (index >= static_cast<int>(values_.size()))
 			{
-				throw std::runtime_error(utils::string::va("parameter %d does not exist", index));
+				return {values_, {}, index, false};
 			}
 
-			return {values_, values_[index], index};
+			return {values_, values_[index], index, true};
 		}
 	private:
 		arguments values_{};
