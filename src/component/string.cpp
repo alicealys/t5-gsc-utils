@@ -163,9 +163,7 @@ namespace string
         void post_unpack() override
         {
             gsc::function::add("va", format_string);
-            gsc::function::add("format", format_string);
             gsc::function::add("formatstring", format_string);
-            gsc::function::add("formatstr", format_string);
             gsc::function::add("sprintf", format_string);
 
             gsc::function::add("printf", [](const std::string& fmt, const scripting::variadic_args& va)
