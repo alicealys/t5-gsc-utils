@@ -230,12 +230,21 @@ public: \
 	};
 
 	class function_argument;
-	using variadic_args = std::vector<function_argument>;
+
+	class variadic_args : public std::vector<function_argument>
+	{
+	public:
+		variadic_args(const size_t begin);
+
+		function_argument operator[](size_t index) const;
+	private:
+		size_t begin_;
+	};
 
 	class function_argument : public script_value
 	{
 	public:
-		function_argument(const arguments& args, const script_value& value, const int index, const bool exists);
+		function_argument(const arguments& args, const script_value& value, const size_t index, const bool exists);
 
 		template <typename T>
 		T as() const
@@ -259,8 +268,8 @@ public: \
 		template <>
 		variadic_args as() const
 		{
-			variadic_args args{};
-			for (auto i = this->index_; i < static_cast<int>(this->values_.size()); i++)
+			variadic_args args{this->index_};
+			for (auto i = this->index_; i < this->values_.size(); i++)
 			{
 				args.push_back({this->values_, this->values_[i], i, true});
 			}
@@ -269,12 +278,7 @@ public: \
 
 		operator variadic_args() const
 		{
-			variadic_args args{};
-			for (auto i = this->index_; i < static_cast<int>(this->values_.size()); i++)
-			{
-				args.push_back({this->values_, this->values_[i], i, true});
-			}
-			return args;
+			return this->as<variadic_args>();
 		}
 
 		template <template<class, class> class C, class T, class ArrayType = array>
@@ -317,7 +321,7 @@ public: \
 
 	private:
 		arguments values_{};
-		int index_{};
+		size_t index_{};
 		bool exists_{};
 	};
 
@@ -326,9 +330,9 @@ public: \
 	public:
 		function_arguments(const arguments& values);
 
-		function_argument operator[](const int index) const
+		function_argument operator[](const size_t index) const
 		{
-			if (index >= static_cast<int>(values_.size()))
+			if (index >= values_.size())
 			{
 				return {values_, {}, index, false};
 			}

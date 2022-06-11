@@ -15,15 +15,6 @@ namespace io
     public:
         void post_unpack() override
         {
-            gsc::function::add("print_", [](const scripting::variadic_args& va)
-            {
-                for (const auto& arg : va)
-                {
-                    printf("%s\t", arg.to_string().data());
-                }
-                printf("\n");
-            });
-
             gsc::function::add("writefile", [](const std::string& file, const std::string& data,
                 const scripting::variadic_args& va)
             {

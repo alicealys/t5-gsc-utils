@@ -384,7 +384,7 @@ namespace scripting
 		return this->type_name();
 	}
 
-	function_argument::function_argument(const arguments& args, const script_value& value, const int index, const bool exists)
+	function_argument::function_argument(const arguments& args, const script_value& value, const size_t index, const bool exists)
 		: script_value(value)
 		  , values_(args)
 		  , index_(index)
@@ -396,5 +396,21 @@ namespace scripting
 	function_arguments::function_arguments(const arguments& values)
 		: values_(values)
 	{
+	}
+
+	variadic_args::variadic_args(const size_t begin)
+		: std::vector<function_argument>({})
+		  , begin_(begin)
+	{
+	}
+
+	function_argument variadic_args::operator[](size_t index) const
+	{
+		if (index >= this->size())
+		{
+			throw std::runtime_error(utils::string::va("parameter %d does not exist", this->begin_ + index));
+		}
+
+		return std::vector<function_argument>::operator[](index);
 	}
 }
