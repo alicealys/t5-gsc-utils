@@ -49,9 +49,9 @@ namespace scripting
 	public:
 		void post_unpack() override
 		{
-			//g_shutdown_game_hook.create(SELECT(0x60DCF0, 0x688A40), g_shutdown_game_stub);
+			g_shutdown_game_hook.create(SELECT_VALUE(0x607700, 0x540950), g_shutdown_game_stub);
 		}
 	};
 }
 
-//REGISTER_COMPONENT(scripting::component)
+REGISTER_COMPONENT(scripting::component)

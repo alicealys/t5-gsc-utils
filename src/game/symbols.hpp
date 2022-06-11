@@ -128,4 +128,6 @@ namespace game
 	WEAK symbol<unsigned int> levelEntityId{0x32C86A0, 0x3DCB2A0};
 
 	WEAK symbol<client_s> svs_clients{0x0, 0x0};
+
+	WEAK symbol<CmdArgs> sv_cmd_args{0x243D208, 0x355BD88};
 }
