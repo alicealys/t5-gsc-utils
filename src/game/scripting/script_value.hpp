@@ -232,7 +232,7 @@ public: \
 	class function_argument;
 	using variadic_args = std::vector<function_argument>;
 
-	class function_argument
+	class function_argument : public script_value
 	{
 	public:
 		function_argument(const arguments& args, const script_value& value, const int index, const bool exists);
@@ -247,7 +247,7 @@ public: \
 
 			try
 			{
-				return this->value_.as<T>();
+				return script_value::as<T>();
 			}
 			catch (const std::exception& e)
 			{
@@ -267,21 +267,6 @@ public: \
 			return args;
 		}
 
-		std::string to_string() const
-		{
-			return this->value_.to_string();
-		}
-
-		std::string type_name() const
-		{
-			return this->value_.type_name();
-		}
-
-		script_value get_raw() const
-		{
-			return this->value_;
-		}
-
 		operator variadic_args() const
 		{
 			variadic_args args{};
@@ -296,9 +281,9 @@ public: \
 		operator C<T, std::allocator<T>>() const
 		{
 			const auto container_type = get_c_typename<C<T, std::allocator<T>>>();
-			if (!this->value_.is<array>())
+			if (!script_value::as<ArrayType>())
 			{
-				const auto type = get_typename(this->value_.get_raw());
+				const auto type = get_typename(this->get_raw());
 
 				throw std::runtime_error(utils::string::va("has type '%s' but should be '%s'",
 					type.data(),
@@ -307,7 +292,7 @@ public: \
 			}
 
 			C<T, std::allocator<T>> container{};
-			const auto array = this->value_.as<ArrayType>();
+			const auto array = script_value::as<ArrayType>();
 			for (auto i = 0; i < array.size(); i++)
 			{
 				try
@@ -332,7 +317,6 @@ public: \
 
 	private:
 		arguments values_{};
-		script_value value_{};
 		int index_{};
 		bool exists_{};
 	};

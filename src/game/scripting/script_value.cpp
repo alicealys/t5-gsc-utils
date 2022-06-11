@@ -385,8 +385,8 @@ namespace scripting
 	}
 
 	function_argument::function_argument(const arguments& args, const script_value& value, const int index, const bool exists)
-		: values_(args)
-		  , value_(value)
+		: script_value(value)
+		  , values_(args)
 		  , index_(index)
 		  , exists_(exists)
 	{

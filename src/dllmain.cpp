@@ -9,6 +9,7 @@ BOOL APIENTRY DllMain(HMODULE /*module_*/, DWORD ul_reason_for_call, LPVOID /*re
 {
 	if (ul_reason_for_call == DLL_PROCESS_ATTACH)
 	{
+		utils::hook::jump(reinterpret_cast<size_t>(&printf), game::Com_Printf);
 		component_loader::post_unpack();
 	}
 
