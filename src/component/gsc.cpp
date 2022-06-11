@@ -205,12 +205,33 @@ namespace gsc
             utils::hook::jump(SELECT_VALUE(0x5DFC40, 0x568B90), print);
 
             scr_settings_hook.create(SELECT_VALUE(0x4CEEA0, 0x55D010), scr_settings_stub);
-            get_function_hook.create(SELECT_VALUE(0x52BF80, 0x465E20), get_function_stub);
-            get_method_hook.create(SELECT_VALUE(0x68A640, 0x555580), get_method_stub);
+
+            get_function_hook.create(utils::hook::extract<size_t>(SELECT_VALUE(0x8A02FB, 0x8DE11B) + 1), get_function_stub);
+            get_method_hook.create(utils::hook::extract<size_t>(SELECT_VALUE(0x8A052E, 0x8DE34E) + 1), get_method_stub);
 
             // \n******* script runtime error *******\n%s\n
             utils::hook::set<char>(SELECT_VALUE(0x9FC5C0 + 40, 0xAABA68 + 40), '\n');
             utils::hook::set<char>(SELECT_VALUE(0x9FC5C0 + 41, 0xAABA68 + 41), '\0');
+
+            gsc::function::add("array", [](const scripting::variadic_args& va)
+            {
+                scripting::array array{};
+
+                for (const auto& arg : va)
+                {
+                    array.push(arg);
+                }
+
+                return array;
+            });
+
+            const auto typeof = [](const scripting::script_value& value)
+            {
+                return value.type_name();
+            };
+
+            gsc::function::add("typeof", typeof);
+            gsc::function::add("type", typeof);
         }
     };
 }

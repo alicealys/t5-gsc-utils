@@ -1,0 +1,188 @@
+#include <stdinc.hpp>
+#include "loader/component_loader.hpp"
+
+#include "game/structs.hpp"
+#include "game/game.hpp"
+
+#include "gsc.hpp"
+
+#include <utils/io.hpp>
+#include <uchar.h>
+
+// lua/lstrlib.c
+#define MAX_FORMAT	32
+#define L_FMTFLAGSF	"-+#0 "
+#define L_FMTFLAGSX	"-#0"
+#define L_FMTFLAGSI	"-+0 "
+#define L_FMTFLAGSU	"-0"
+#define L_FMTFLAGSC	"-"
+
+namespace string
+{
+    namespace
+    {
+        // lua/lstrlib.c
+        const char* getformat(const char* strfrmt, char* form) 
+        {
+            const auto len = strspn(strfrmt, L_FMTFLAGSF "123456789.") + 1;
+            if (len >= MAX_FORMAT - 10)
+            {
+                throw std::runtime_error("invalid format (too long)");
+            }
+
+            *(form++) = '%';
+            std::memcpy(form, strfrmt, len * sizeof(char));
+            *(form + len) = '\0';
+            return strfrmt + len - 1;
+        }
+
+        // lua/lstrlib.c
+        const char* get_2_digits(const char* s) 
+        {
+            if (isdigit(static_cast<unsigned char>(*s))) 
+            {
+                s++;
+                if (isdigit(static_cast<unsigned char>(*s)))
+                {
+                    s++;
+                }
+            }
+
+            return s;
+        }
+
+        // lua/lstrlib.c
+        void check_format(const char* form, const char* flags, int precision) 
+        {
+            const char* spec = form + 1;
+            spec += std::strspn(spec, flags);
+            if (*spec != '0') 
+            {
+                spec = get_2_digits(spec);
+                if (*spec == '.' && precision) 
+                {
+                    spec++;
+                    spec = get_2_digits(spec);
+                }
+            }
+            if (!std::isalpha(static_cast<unsigned char>(*spec)))
+            {
+                throw std::runtime_error(utils::string::va("invalid conversion specification: '%s'", form));
+            }
+        }
+
+        // partially lua/lstrlib.c
+        std::string format_string(const std::string& fmt, const scripting::variadic_args& va)
+        {
+            std::string buffer{};
+            size_t va_index{};
+            const char* strfrmt = fmt.data();
+            const char* strfrmt_end = strfrmt + fmt.size();
+
+            while (strfrmt < strfrmt_end)
+            {
+                if (*strfrmt != '%')
+                {
+                    buffer.push_back(*strfrmt++);
+                }
+                else if (*++strfrmt == '%')
+                {
+                    buffer.push_back(*strfrmt++);
+                }
+                else
+                {
+                    char form[MAX_FORMAT]{};
+                    const char* flags = "";
+                    strfrmt = getformat(strfrmt, form);
+
+                    switch (*strfrmt++)
+                    {
+                    case 'd':
+                    case 'i':
+                        flags = L_FMTFLAGSI;
+                        goto intcase;
+                    case 'u':
+                    case 'p':
+                        flags = L_FMTFLAGSU;
+                        goto intcase;
+                    case 'o':
+                    case 'x':
+                    case 'X':
+                        flags = L_FMTFLAGSX;
+                    intcase:
+                    {
+                        check_format(form, flags, 1);
+                        const auto value = va[va_index].as<int>();
+                        buffer.append(utils::string::va(form, value));
+                        va_index++;
+                        break;
+                    }
+                    case 'f':
+                    case 'F':
+                    case 'e':
+                    case 'E':
+                    case 'g':
+                    case 'G':
+                    {
+                        check_format(form, L_FMTFLAGSF, 1);
+                        const auto value = va[va_index].as<float>();
+                        buffer.append(utils::string::va(form, value));
+                        va_index++;
+                        break;
+                    }
+                    case 'c':
+                    {
+                        const auto value = va[va_index].as<int>();
+                        check_format(form, L_FMTFLAGSC, 0);
+                        buffer.append(utils::string::va(form, static_cast<char>(value)));
+                        va_index++;
+                        break;
+                    }
+                    case 's':
+                    {
+                        const auto str = va[va_index].as<std::string>();
+                        buffer.append(str);
+                        va_index++;
+                        break;
+                    }
+                    default:
+                    {
+                        throw std::runtime_error(utils::string::va("invalid conversion '%s' to 'format'", form));
+                    }
+                    }
+                }
+            }
+
+            return buffer;
+        }
+    }
+
+    class component final : public component_interface
+    {
+    public:
+        void post_unpack() override
+        {
+            gsc::function::add("va", format_string);
+            gsc::function::add("format", format_string);
+            gsc::function::add("formatstring", format_string);
+            gsc::function::add("formatstr", format_string);
+            gsc::function::add("sprintf", format_string);
+
+            gsc::function::add("printf", [](const std::string& fmt, const scripting::variadic_args& va)
+            {
+                printf("%s", format_string(fmt, va).data());
+            });
+
+            gsc::function::add("print", [](const scripting::variadic_args& va)
+            {
+                for (const auto& arg : va)
+                {
+                    printf("%s\t", arg.to_string().data());
+                }
+                printf("\n");
+            });
+        }
+    };
+}
+
+REGISTER_COMPONENT(string::component)
