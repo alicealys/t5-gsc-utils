@@ -767,4 +767,19 @@ namespace game
 	{
 		ScriptParseTree* scriptParseTree;
 	};
+
+	union sval_u
+	{
+		unsigned __int8 type;
+		unsigned int stringValue;
+		unsigned int idValue;
+		float floatValue;
+		int intValue;
+		sval_u* node;
+		unsigned int sourcePosValue;
+		const char* codePosValue;
+		const char* debugString;
+		void* block;
+	};
+
 }

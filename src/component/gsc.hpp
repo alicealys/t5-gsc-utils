@@ -56,6 +56,13 @@ namespace gsc
 		{
 			add_internal(name, wrap_function(f));
 		}
+
+		template <typename ...Args, typename F>
+		void add_multiple(F f, Args&& ...names)
+		{
+			const auto wrap = wrap_function(f);
+			(add_internal(names, wrap), ...);
+		}
 	}
 
 	namespace method
@@ -66,6 +73,13 @@ namespace gsc
 		void add(const std::string& name, F f)
 		{
 			add_internal(name, wrap_function(f));
+		}
+
+		template <typename ...Args, typename F>
+		void add_multiple(F f, Args&& ...names)
+		{
+			const auto wrap = wrap_function(f);
+			(add_internal(names, wrap), ...);
 		}
 	}
 }

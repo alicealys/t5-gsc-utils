@@ -171,6 +171,42 @@ namespace gsc
         {
             scr_settings_hook.invoke<void>(developer_script, developer_script, 0, inst);
         }
+
+        utils::hook::detour scr_get_builtin_hook;
+        unsigned int scr_get_builtin_stub(int inst, game::sval_u func_name)
+        {
+            const auto type = *reinterpret_cast<uint8_t*>(func_name.block);
+            if (type != 28)
+            {
+                return scr_get_builtin_hook.invoke<unsigned int>(inst, func_name);
+            }
+
+            const auto func_namea = *reinterpret_cast<void**>(reinterpret_cast<size_t>(func_name.block) + 4);
+            const auto typea = *reinterpret_cast<uint8_t*>(func_namea);
+            if (typea != 20)
+            {
+                return scr_get_builtin_hook.invoke<unsigned int>(inst, func_name);
+            }
+
+            const auto func_nameb = *reinterpret_cast<void**>(reinterpret_cast<size_t>(func_namea) + 4);
+            const auto typeb = *reinterpret_cast<uint8_t*>(func_nameb);
+
+            if (typeb == 23) // script::function type call
+            {
+                const auto namespace_ = game::SL_ConvertToString(
+                    *reinterpret_cast<unsigned int*>(reinterpret_cast<size_t>(func_nameb) + 4), game::SCRIPTINSTANCE_SERVER);
+                const auto name = game::SL_ConvertToString(
+                    *reinterpret_cast<unsigned int*>(reinterpret_cast<size_t>(func_nameb) + 8), game::SCRIPTINSTANCE_SERVER);
+
+                const auto full_name = utils::string::va("%s::%s", namespace_, name);
+                if (functions.find(full_name) != functions.end())
+                {
+                    return game::SL_GetString(full_name, 0, game::SCRIPTINSTANCE_SERVER);
+                }
+            }
+
+            return scr_get_builtin_hook.invoke<unsigned int>(inst, func_name);
+        }
     }
 
     namespace function
@@ -209,6 +245,8 @@ namespace gsc
             get_function_hook.create(utils::hook::extract<size_t>(SELECT_VALUE(0x8A02FB, 0x8DE11B) + 1), get_function_stub);
             get_method_hook.create(utils::hook::extract<size_t>(SELECT_VALUE(0x8A052E, 0x8DE34E) + 1), get_method_stub);
 
+            scr_get_builtin_hook.create(SELECT_VALUE(0x4ACAC0, 0x411490), scr_get_builtin_stub);
+
             // \n******* script runtime error *******\n%s\n
             utils::hook::set<char>(SELECT_VALUE(0x9FC5C0 + 40, 0xAABA68 + 40), '\n');
             utils::hook::set<char>(SELECT_VALUE(0x9FC5C0 + 41, 0xAABA68 + 41), '\0');
@@ -225,13 +263,10 @@ namespace gsc
                 return array;
             });
 
-            const auto typeof = [](const scripting::script_value& value)
+            gsc::function::add_multiple([](const scripting::script_value& value)
             {
                 return value.type_name();
-            };
-
-            gsc::function::add("typeof", typeof);
-            gsc::function::add("type", typeof);
+            }, "typeof", "type");
         }
     };
 }
