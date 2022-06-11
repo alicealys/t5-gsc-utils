@@ -179,13 +179,40 @@ namespace string
                 printf("\n");
             });
 
-            gsc::function::add_multiple(utils::string::to_upper, "toupper", "string::toupper");
-            gsc::function::add_multiple(utils::string::to_lower, "tolower", "string::tolower");
+            gsc::function::add_multiple(utils::string::to_upper, "toupper", "string::to_upper");
+            gsc::function::add_multiple(utils::string::to_lower, "tolower", "string::to_lower");
 
-            gsc::function::add("string::isnumeric", utils::string::is_numeric);
-            gsc::function::add("string::startswith", utils::string::starts_with);
-            gsc::function::add("string::endswith", utils::string::ends_with);
+            gsc::function::add("string::is_numeric", utils::string::is_numeric);
+            gsc::function::add("string::start_swith", utils::string::starts_with);
+            gsc::function::add("string::ends_with", utils::string::ends_with);
             gsc::function::add("string::replace", utils::string::replace);
+
+            gsc::function::add("string::regex_replace", [](const std::string& str, const std::regex& expr, 
+                const std::string& with)
+            {
+                return std::regex_replace(str, expr, with);
+            });
+
+            gsc::function::add("string::regex_match", [](const std::string& str, const std::regex& expr)
+            {
+                scripting::array array_match{};
+                std::smatch match{};
+
+                if (std::regex_match(str, match, std::regex(expr)))
+                {
+                    for (const auto& s : match)
+                    {
+                        array_match.push((s.str()));
+                    }
+                }
+
+                return array_match;
+            });
+
+            gsc::function::add("string::regex_search", [](const std::string& str, const std::regex& expr)
+            {
+                return std::regex_search(str, expr);
+            });
         }
     };
 }
