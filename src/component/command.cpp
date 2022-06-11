@@ -243,6 +243,24 @@ namespace command
 					function(player, {array});
 				});
 			}, "addclientcommand", "command::add_sv");
+
+			gsc::method::add("tell", [](const scripting::entity& player, const std::string& msg)
+			{
+				const auto entref = player.get_entity_reference();
+				if (entref.classnum != 0 || entref.entnum >= 18)
+				{
+					throw std::runtime_error("Not a player entity");
+				}
+
+				game::SV_GameSendServerCommand(entref.entnum, 0, utils::string::va("h \"%s\"", msg.data()));
+			});
+
+			gsc::function::add("say", [](const std::string& msg)
+			{
+				game::SV_GameSendServerCommand(-1, 0, utils::string::va("h \"%s\"", msg.data()));
+			});
+
+			gsc::function::add("sendservercommand", game::SV_GameSendServerCommand.get());
 		}
 	};
 }
