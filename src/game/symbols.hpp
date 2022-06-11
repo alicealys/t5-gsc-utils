@@ -9,13 +9,15 @@ namespace game
 	WEAK symbol<int(const char* str)> BG_StringHashValue{0x0, 0x0};
 
 	WEAK symbol<void(int localClientNum, const char* text)> Cbuf_InsertText{0x0, 0x0};
-	WEAK symbol<void(int localClientNum, const char* text)> Cbuf_AddText{0x0, 0x0};
-	WEAK symbol<void(int localClientNum, int controllerIndex, const char* text)> Cmd_ExecuteSingleCommand{0x0, 0x0};
-	WEAK symbol<void(const char* cmdName, void(), cmd_function_t* allocedCmd)> Cmd_AddCommandInternal{0x0, 0x0};
+	WEAK symbol<void(int localClientNum, const char* text)> Cbuf_AddText{0x49B930, 0x56EF70};
+	WEAK symbol<void(int localClientNum, int controllerIndex, const char* text)> Cmd_ExecuteSingleCommand{0x619D00, 0x50B470};
+	WEAK symbol<void(const char* cmdName, void(), cmd_function_t* allocedCmd)> Cmd_AddCommandInternal{0x661400, 0x6AD580};
 	WEAK symbol<const char*(int index)> Cmd_Argv{0x0, 0x0};
-	WEAK symbol<void(const char* cmdName)> Cmd_RemoveCommand{0x0, 0x0};
+	WEAK symbol<void(const char* cmdName)> Cmd_RemoveCommand{0x5F1A90, 0x527EA0};
 
 	WEAK symbol<void(int clientNum)> ClientUserInfoChanged{0x0, 0x0};
+
+	WEAK symbol<int(const char* fmt, ...)> Com_Printf{0x566BC0, 0x64C260};
 
 	WEAK symbol<const dvar_t*(const char*)> Dvar_FindVar{0x0, 0x0};
 	WEAK symbol<int(const dvar_t*)> Dvar_GetInt{0x0, 0x0};
@@ -40,8 +42,8 @@ namespace game
 	WEAK symbol<void(scriptInstance_t inst)> Scr_ClearOutParams{0x654D10, 0x588680};
 
 	WEAK symbol<unsigned int(scriptInstance_t inst)> AllocObject{0x0, 0x0};
-	WEAK symbol<unsigned int(scriptInstance_t inst, unsigned int id)> AllocThread{0x0, 0x0};
-	WEAK symbol<void(scriptInstance_t inst, unsigned int id)> RemoveRefToObject{0x0, 0x0};
+	WEAK symbol<unsigned int(scriptInstance_t inst, unsigned int id)> AllocThread{0x69E140, 0x43CA60};
+	WEAK symbol<void(scriptInstance_t inst, unsigned int id)> RemoveRefToObject{0x5517B0, 0x698FA0};
 	WEAK symbol<void(scriptInstance_t inst, const float* vectorValue)> RemoveRefToVector{0x0, 0x0};
 	WEAK symbol<void(scriptInstance_t inst, const int type, VariableUnion value)> AddRefToValue_{0x53FD50, 0x6706B0};
 
@@ -95,13 +97,13 @@ namespace game
 
 	WEAK symbol<gentity_s*(scr_entref_t entref)> GetPlayerEntity{0x0, 0x0};
 
-	WEAK symbol<unsigned int(scriptInstance_t inst, unsigned int localId, const char* pos, unsigned int paramcount)> VM_Execute{0x0, 0x0};
+	WEAK symbol<unsigned int(scriptInstance_t inst, unsigned int localId, const char* pos, unsigned int paramcount)> VM_Execute{0x8ACE60, 0x8EADE0};
 
 	WEAK symbol<void(int clientNum, const char* reason)> SV_GameDropClient{0x0, 0x0};
 	WEAK symbol<bool(int clientNum)> SV_IsTestClient{0x0, 0x0};
 	WEAK symbol<void(int clientNum, int type, const char* command)> SV_GameSendServerCommand{0x0, 0x0};
 
-	WEAK symbol<void*(int valueIndex)> Sys_GetValue{0x0, 0x0};
+	WEAK symbol<void*(int valueIndex)> Sys_GetValue{0x67D4F0, 0x529EB0};
 	WEAK symbol<int()> Sys_Milliseconds{0x0, 0x0};
 
 	WEAK symbol<void*(jmp_buf* Buf, int Value)> longjmp{0x96B980, 0x9D05C4};
@@ -123,7 +125,7 @@ namespace game
 	WEAK symbol<scr_classStruct_t*> g_classMap{0x0, 0x0};
 
 	WEAK symbol<gentity_s> g_entities{0x0, 0x0};
-	WEAK symbol<unsigned int> levelEntityId{0x0, 0x0};
+	WEAK symbol<unsigned int> levelEntityId{0x32C86A0, 0x3DCB2A0};
 
 	WEAK symbol<client_s> svs_clients{0x0, 0x0};
 }
