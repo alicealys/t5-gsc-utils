@@ -130,12 +130,12 @@ namespace command
 		{
 			scripting::on_shutdown(clear_script_commands);
 
-			gsc::function::add("executecommand", [](const std::string& command)
+			const auto execute_command = [](const std::string& command)
 			{
 				execute(command, false);
-			});
+			};
 
-			gsc::function::add("addcommand", [](const std::string& name, const scripting::function& function)
+			const auto add_command = [](const std::string& name, const scripting::function& function)
 			{
 				command::add_script_command(name, [function](const command::params& params)
 				{
@@ -148,7 +148,28 @@ namespace command
 
 					function({array});
 				});
-			});
+			};
+
+			gsc::function::add_multiple([](const std::string& command)
+			{
+				execute(command, false);
+			}, "executecommand", "command::execute");
+
+
+			gsc::function::add_multiple([](const std::string& name, const scripting::function& function)
+			{
+				command::add_script_command(name, [function](const command::params& params)
+				{
+					scripting::array array;
+
+					for (auto i = 0; i < params.size(); i++)
+					{
+						array.push(params[i]);
+					}
+
+					function({array});
+				});
+			}, "addcommand", "command::add");
 		}
 	};
 }

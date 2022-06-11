@@ -24,7 +24,7 @@ namespace string
         // lua/lstrlib.c
         const char* getformat(const char* strfrmt, char* form) 
         {
-            const auto len = strspn(strfrmt, L_FMTFLAGSF "123456789.") + 1;
+            const auto len = std::strspn(strfrmt, L_FMTFLAGSF "123456789.") + 1;
             if (len >= MAX_FORMAT - 10)
             {
                 throw std::runtime_error("invalid format (too long)");
@@ -162,9 +162,8 @@ namespace string
     public:
         void post_unpack() override
         {
-            gsc::function::add("va", format_string);
-            gsc::function::add("formatstring", format_string);
-            gsc::function::add("sprintf", format_string);
+            gsc::function::add_multiple(format_string, "va", "string::va", 
+                "formatstring", "string::format", "sprintf");
 
             gsc::function::add("printf", [](const std::string& fmt, const scripting::variadic_args& va)
             {
@@ -179,6 +178,14 @@ namespace string
                 }
                 printf("\n");
             });
+
+            gsc::function::add_multiple(utils::string::to_upper, "toupper", "string::toupper");
+            gsc::function::add_multiple(utils::string::to_lower, "tolower", "string::tolower");
+
+            gsc::function::add("string::isnumeric", utils::string::is_numeric);
+            gsc::function::add("string::startswith", utils::string::starts_with);
+            gsc::function::add("string::endswith", utils::string::ends_with);
+            gsc::function::add("string::replace", utils::string::replace);
         }
     };
 }
