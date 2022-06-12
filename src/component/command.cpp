@@ -6,6 +6,7 @@
 #include "command.hpp"
 #include "gsc.hpp"
 #include "scripting.hpp"
+#include "scheduler.hpp"
 
 #include <utils/string.hpp>
 #include <utils/memory.hpp>
@@ -91,6 +92,16 @@ namespace command
 		return result;
 	}
 
+	std::vector<std::string> params::get_all() const
+	{
+		std::vector<std::string> params_;
+		for (auto i = 0; i < this->size(); i++)
+		{
+			params_.push_back(this->get(i));
+		}
+		return params_;
+	}
+
 	params_sv::params_sv()
 		: nesting_(game::sv_cmd_args->nesting)
 	{
@@ -126,6 +137,16 @@ namespace command
 		}
 
 		return result;
+	}
+
+	std::vector<std::string> params_sv::get_all() const
+	{
+		std::vector<std::string> params_;
+		for (auto i = 0; i < this->size(); i++)
+		{
+			params_.push_back(this->get(i));
+		}
+		return params_;
 	}
 
 	void add_raw(const char* name, void (*callback)())
@@ -216,14 +237,18 @@ namespace command
 			{
 				command::add_script_command(name, [function](const command::params& params)
 				{
-					scripting::array array;
-
-					for (auto i = 0; i < params.size(); i++)
+					const auto params_ = params.get_all();
+					scheduler::once([=]()
 					{
-						array.push(params[i]);
-					}
+						scripting::array array;
 
-					function({array});
+						for (auto i = 0; i < params.size(); i++)
+						{
+							array.push(params[i]);
+						}
+
+						function({array});
+					});
 				});
 			}, "addcommand", "command::add");
 
@@ -231,16 +256,20 @@ namespace command
 			{
 				command::add_script_sv_command(name, [function](const int client_num, const command::params_sv& params)
 				{
-					const scripting::entity player = game::Scr_GetEntityId(game::SCRIPTINSTANCE_SERVER, client_num, 0, 0);
-
-					scripting::array array;
-
-					for (auto i = 0; i < params.size(); i++)
+					const auto params_ = params.get_all();
+					scheduler::once([=]()
 					{
-						array.push(params[i]);
-					}
+						const scripting::entity player = game::Scr_GetEntityId(game::SCRIPTINSTANCE_SERVER, client_num, 0, 0);
 
-					function(player, {array});
+						scripting::array array;
+
+						for (auto i = 0; i < params.size(); i++)
+						{
+							array.push(params[i]);
+						}
+
+						function(player, {array});
+					}, scheduler::pipeline::server);
 				});
 			}, "addclientcommand", "command::add_sv");
 
