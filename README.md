@@ -143,7 +143,8 @@ A list of all the functions and methods that are added by this plugin.
     ```
   * `sendServerCommand(client_num, reliable, text)`: Executes SV_GameSendServerCommand.
 ## String
-  * `va(fmt, ...)`, `formatString(fmt, ...)`, `sprintf(fmt, ...)`: Formats a string:
+  * `va(fmt, ...)`, `formatString(fmt, ...)`, `sprintf(fmt, ...)`  
+    `string::va(fmt, ...)`, `string::format(fmt, ...)`: Formats a string:
 
     ```gsc
     init()
