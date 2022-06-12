@@ -87,7 +87,7 @@ A list of all the functions and methods that are added by this plugin.
   * `copyFolder(source, target)`, `copyDirectory(source, target)`: Copies a folder.
   * `removeDirectory(path[, recursive])`: Removes a directory and optionally all its contents.
 ## Command
-  * `executeCommand(command)`: Executes a console command.
+  * `executeCommand(command)`, `command::execute(command)`: Executes a console command.
 
     ```gsc
     fast_restart()
@@ -95,7 +95,7 @@ A list of all the functions and methods that are added by this plugin.
         executeCommand("fast_restart");
     }
     ```
-  * `addCommand(name, callback)`: Adds a console command.
+  * `addCommand(name, callback)`, `command::add(name, callback)`: Adds a console command.
 
     ```gsc
     init()
@@ -109,6 +109,39 @@ A list of all the functions and methods that are added by this plugin.
         print("Hello world", args.size);
     }
     ```
+  * `addClientCommand(name, callback)`, `command::add_sv(name, callback)`: Adds a client command (can be executed by players through the console).
+
+    ```gsc
+    init()
+    {
+        command::add_sv("suicide", ::sv_cmd_suicide);
+    }
+    
+    sv_cmd_suicide(args)
+    {
+        self suicide();
+    }
+    ```
+  * `self tell(message)`: Prints a message to a player's chat.
+  * `say(message)`: Prints a message to all players' chat.
+
+    ```gsc
+    init()
+    {
+        level thread on_player_connected();
+    }
+  
+    on_player_connected()
+    {
+        while (true)
+        {
+            level waittill("connected", player);
+            say(string::format("%s connected!", player.name));
+            player tell(string::format("Hello %s!", player.name));
+        }
+    }
+    ```
+  * `sendServerCommand(client_num, reliable, text)`: Executes SV_GameSendServerCommand.
 ## String
   * `va(fmt, ...)`, `formatString(fmt, ...)`, `sprintf(fmt, ...)`: Formats a string:
 
@@ -126,6 +159,15 @@ A list of all the functions and methods that are added by this plugin.
         printf("hello %i %f %s", 1, 1.2, "world");
     }
     ```
+  * `tolower(string)`, `string::to_lower(string)`: Converts the string to lowercase.
+  * `toupper(string)`, `string::to_upper(string)`: Converts the string to uppercase.
+  * `string::is_numeric(string)`: Return true if the string contains only numbers.
+  * `string::starts_with(string, start)`: Returns true if the string starts with the specified substring.
+  * `string::ends_with(string, end)`: Returns true if the string ends with the specified substring.
+  * `string::replace(string, what, with)`: Replaces the specified substring with another string.
+  * `string::regex_replace(string, expr, with)`: Replaces the matching substring with another string.
+  * `string::regex_match(string, expr)`: Determines if a regex matches the entire string and returns the matches as an array.
+  * `string::regex_search(string, expr)`: Determines if a regex matches part of the string.
 ## Misc
   * `array(...)`: Creates an array from a list of arguments:
 
