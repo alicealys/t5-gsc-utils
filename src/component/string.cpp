@@ -183,7 +183,7 @@ namespace string
             gsc::function::add_multiple(utils::string::to_lower, "tolower", "string::to_lower");
 
             gsc::function::add("string::is_numeric", utils::string::is_numeric);
-            gsc::function::add("string::starts_swith", utils::string::starts_with);
+            gsc::function::add("string::starts_with", utils::string::starts_with);
             gsc::function::add("string::ends_with", utils::string::ends_with);
             gsc::function::add("string::replace", utils::string::replace);
 
