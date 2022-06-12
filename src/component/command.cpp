@@ -14,43 +14,113 @@
 
 namespace command
 {
-	std::unordered_map<std::string, std::function<void(params&)>> handlers;
-	std::unordered_map<std::string, std::function<void(int, params_sv&)>> handlers_sv;
-
-	std::vector<std::string> script_commands;
-	std::vector<std::string> script_sv_commands;
-	utils::memory::allocator allocator;
-
-	utils::hook::detour client_command_hook;
-
-	game::CmdArgs* get_cmd_args()
+	namespace
 	{
-		return reinterpret_cast<game::CmdArgs*>(game::Sys_GetValue(4));
-	}
+		std::unordered_map<std::string, std::function<void(params&)>> handlers;
+		std::unordered_map<std::string, std::function<void(int, params_sv&)>> handlers_sv;
 
-	void main_handler()
-	{
-		params params = {};
+		std::vector<std::string> script_commands;
+		std::vector<std::string> script_sv_commands;
+		utils::memory::allocator allocator;
 
-		const auto command = utils::string::to_lower(params[0]);
+		utils::hook::detour client_command_hook;
 
-		if (handlers.find(command) != handlers.end())
+		std::vector<scripting::function> chat_callbacks;
+
+		game::CmdArgs* get_cmd_args()
 		{
-			handlers[command](params);
-		}
-	}
-
-	void client_command_stub(const int client_num)
-	{
-		params_sv params = {};
-
-		const auto command = utils::string::to_lower(params[0]);
-		if (handlers_sv.find(command) != handlers_sv.end())
-		{
-			handlers_sv[command](client_num, params);
+			return reinterpret_cast<game::CmdArgs*>(game::Sys_GetValue(4));
 		}
 
-		client_command_hook.invoke<void>(client_num);
+		void main_handler()
+		{
+			params params = {};
+
+			const auto command = utils::string::to_lower(params[0]);
+
+			if (handlers.find(command) != handlers.end())
+			{
+				handlers[command](params);
+			}
+		}
+
+		bool can_add_callback = true;
+		bool handle_chat_command(const int client_num, const params_sv& params)
+		{
+			const auto _0 = gsl::finally([]
+			{
+				can_add_callback = true;
+			});
+			can_add_callback = false;
+
+			auto hide = false;
+			const scripting::entity player = game::Scr_GetEntityId(game::SCRIPTINSTANCE_SERVER, client_num, 0, 0);
+
+			const auto command = utils::string::to_lower(params[0]);
+			const auto message = params.join(1);
+
+			for (const auto& callback : chat_callbacks)
+			{
+				const auto res = callback(player, {message, command == "say_team"});
+				if (res.is<bool>() && !res.as<bool>())
+				{
+					hide = true;
+				}
+			}
+
+			return hide;
+		}
+
+		void client_command_stub(const int client_num)
+		{
+			params_sv params = {};
+
+			const auto command = utils::string::to_lower(params[0]);
+			if ((command == "say" || command == "say_team") &&
+				handle_chat_command(client_num, params))
+			{
+				return;
+			}
+
+			if (handlers_sv.find(command) != handlers_sv.end())
+			{
+				handlers_sv[command](client_num, params);
+			}
+
+			client_command_hook.invoke<void>(client_num);
+		}
+
+		void add_script_command(const std::string& name, const std::function<void(const params&)>& callback)
+		{
+			script_commands.push_back(name);
+			const auto name_ = allocator.duplicate_string(name);
+			add(name_, callback);
+		}
+
+		void add_script_sv_command(const std::string& name, const std::function<void(int, const params_sv&)>& callback)
+		{
+			script_sv_commands.push_back(name);
+			add_sv(name, callback);
+		}
+
+		void clear()
+		{
+			for (const auto& name : script_commands)
+			{
+				handlers.erase(name);
+				game::Cmd_RemoveCommand(name.data());
+			}
+
+			for (const auto& name : script_sv_commands)
+			{
+				handlers_sv.erase(name);
+			}
+
+			allocator.clear();
+			script_commands.clear();
+			script_sv_commands.clear();
+			chat_callbacks.clear();
+		}
 	}
 
 	params::params()
@@ -175,37 +245,6 @@ namespace command
 		}
 	}
 
-	void add_script_command(const std::string& name, const std::function<void(const params&)>& callback)
-	{
-		script_commands.push_back(name);
-		const auto name_ = allocator.duplicate_string(name);
-		add(name_, callback);
-	}
-
-	void add_script_sv_command(const std::string& name, const std::function<void(int, const params_sv&)>& callback)
-	{
-		script_sv_commands.push_back(name);
-		add_sv(name, callback);
-	}
-
-	void clear_script_commands()
-	{
-		for (const auto& name : script_commands)
-		{
-			handlers.erase(name);
-			game::Cmd_RemoveCommand(name.data());
-		}
-
-		for (const auto& name : script_sv_commands)
-		{
-			handlers_sv.erase(name);
-		}
-
-		allocator.clear();
-		script_commands.clear();
-		script_sv_commands.clear();
-	}
-
 	void execute(std::string command, const bool sync)
 	{
 		command += "\n";
@@ -225,7 +264,7 @@ namespace command
 	public:
 		void post_unpack() override
 		{
-			scripting::on_shutdown(clear_script_commands);
+			scripting::on_shutdown(clear);
 			client_command_hook.create(SELECT_VALUE(0x4AF770, 0x63DB70), client_command_stub);
 
 			gsc::function::add_multiple([](const std::string& command)
@@ -290,6 +329,16 @@ namespace command
 			});
 
 			gsc::function::add("sendservercommand", game::SV_GameSendServerCommand.get());
+
+			gsc::function::add_multiple([](const scripting::function& callback)
+			{
+				if (!can_add_callback)
+				{
+					throw std::runtime_error("Cannot add a callback in this context");
+				}
+
+				chat_callbacks.push_back(callback);
+			}, "onplayersay", "command::on_player_say");
 		}
 	};
 }
