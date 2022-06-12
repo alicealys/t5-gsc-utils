@@ -12,6 +12,7 @@ namespace scheduler
 	namespace
 	{
 		utils::hook::detour server_frame_hook;
+		bool kill_thread = false;
 		
 		struct task
 		{
@@ -143,7 +144,7 @@ namespace scheduler
 		{
 			thread = std::thread([]()
 			{
-				while (true)
+				while (!kill_thread)
 				{
 					execute(pipeline::async);
 					std::this_thread::sleep_for(10ms);
@@ -151,6 +152,16 @@ namespace scheduler
 			});
 
 			server_frame_hook.create(SELECT_VALUE(0x43E340, 0x46B680), server_frame_stub);
+		}
+
+		void pre_destroy() override
+		{
+			kill_thread = true;
+
+			if (thread.joinable())
+			{
+				thread.join();
+			}
 		}
 	};
 }
