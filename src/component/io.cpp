@@ -15,7 +15,7 @@ namespace io
     public:
         void post_unpack() override
         {
-            gsc::function::add("writefile", [](const std::string& file, const std::string& data,
+            gsc::function::add_multiple([](const std::string& file, const std::string& data,
                 const scripting::variadic_args& va)
             {
                 auto append = false;
@@ -26,23 +26,23 @@ namespace io
                 }
 
                 return utils::io::write_file(file, data, append);
-            });
+            }, "writefile", "io::write_file");
 
-            gsc::function::add("appendfile", [](const std::string& file, const std::string& data)
+            gsc::function::add_multiple([](const std::string& file, const std::string& data)
             {
                 return utils::io::write_file(file, data, true);
-            });
+            }, "appendfile", "io::append_file");
 
-            gsc::function::add("fileexists", utils::io::file_exists);
-            gsc::function::add("movefile", utils::io::move_file);
-            gsc::function::add("filesize", utils::io::file_size);
-            gsc::function::add("createdirectory", utils::io::create_directory);
-            gsc::function::add("directoryexists", utils::io::directory_exists);
-            gsc::function::add("directoryisempty", utils::io::directory_is_empty);
-            gsc::function::add("listfiles", utils::io::list_files);
-            gsc::function::add("removefile", utils::io::remove_file);
+            gsc::function::add_multiple(utils::io::file_exists, "fileexists", "io::file_exists");
+            gsc::function::add_multiple(utils::io::move_file, "movefile", "io::move_file");
+            gsc::function::add_multiple(utils::io::file_size, "filesize", "io::file_size");
+            gsc::function::add_multiple(utils::io::create_directory, "createdirectory", "io::create_directory");
+            gsc::function::add_multiple(utils::io::directory_exists, "directoryexists", "io::directory_exists");
+            gsc::function::add_multiple(utils::io::directory_is_empty, "directoryisempty", "io::directory_is_empty");
+            gsc::function::add_multiple(utils::io::list_files, "listfiles", "io::list_files");
+            gsc::function::add_multiple(utils::io::remove_file, "removefile", "io::remove_file");
 
-            gsc::function::add("removedirectory", [](const std::filesystem::path& src, const scripting::variadic_args& va)
+            gsc::function::add_multiple([](const std::filesystem::path& src, const scripting::variadic_args& va)
             {
                 bool recursive = false;
                 if (va.size() > 0)
@@ -51,11 +51,11 @@ namespace io
                 }
 
                 utils::io::remove_directory(src, recursive);
-            });
+            }, "removedirectory", "io::remove_directory");
 
-            gsc::function::add("copyfolder", utils::io::copy_folder);
-            gsc::function::add("copydirectory", utils::io::copy_folder);
-            gsc::function::add("readfile", static_cast<std::string(*)(const std::string&)>(utils::io::read_file));
+            gsc::function::add_multiple(utils::io::copy_folder, "copyfolder", "io::copy_folder");
+            gsc::function::add_multiple(utils::io::copy_folder, "copydirectory", "io::copy_directory");
+            gsc::function::add_multiple(static_cast<std::string(*)(const std::string&)>(utils::io::read_file), "readfile", "io::read_file");
         }
     };
 }
