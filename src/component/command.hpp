@@ -44,9 +44,5 @@ namespace command
 	void add(const char* name, std::function<void(params&)> callback);
 	void add_sv(const std::string& name, std::function<void(int, const params_sv&)> callback);
 
-	void add_script_command(const std::string& name, const std::function<void(const params&)>& callback);
-	void add_script_sv_command(const std::string& name, const std::function<void(int, const params_sv&)>& callback);
-	void clear_script_commands();
-
 	void execute(std::string command, const bool sync = false);
 }
