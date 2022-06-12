@@ -101,7 +101,7 @@ namespace game
 
 	WEAK symbol<void(int clientNum, const char* reason)> SV_GameDropClient{0x0, 0x0};
 	WEAK symbol<bool(int clientNum)> SV_IsTestClient{0x0, 0x0};
-	WEAK symbol<void(int clientNum, int type, const char* command)> SV_GameSendServerCommand{0x0, 0x0};
+	WEAK symbol<void(int clientNum, int type, const char* command)> SV_GameSendServerCommand{0x543CF0, 0x6B8730};
 
 	WEAK symbol<void*(int valueIndex)> Sys_GetValue{0x67D4F0, 0x529EB0};
 	WEAK symbol<int()> Sys_Milliseconds{0x0, 0x0};

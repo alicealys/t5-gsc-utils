@@ -11,6 +11,8 @@ namespace scheduler
 {
 	namespace
 	{
+		utils::hook::detour server_frame_hook;
+		
 		struct task
 		{
 			std::function<bool()> handler{};
@@ -94,13 +96,10 @@ namespace scheduler
 			execute(pipeline::server);
 		}
 
-		void server_frame_stub(utils::hook::assembler& a)
+		void server_frame_stub()
 		{
-			a.pushad();
-			a.call(execute_server);
-			a.popad();
-
-			a.jmp(SELECT_VALUE(0x0, 0x0));
+			execute(pipeline::server);
+			server_frame_hook.invoke<void>();
 		}
 	}
 
@@ -151,9 +150,9 @@ namespace scheduler
 				}
 			});
 
-
+			server_frame_hook.create(SELECT_VALUE(0x43E340, 0x46B680), server_frame_stub);
 		}
 	};
 }
 
-//REGISTER_COMPONENT(scheduler::component)
+REGISTER_COMPONENT(scheduler::component)
