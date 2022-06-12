@@ -168,6 +168,20 @@ A list of all the functions and methods that are added by this plugin.
   * `string::regex_replace(string, expr, with)`: Replaces the matching substring with another string.
   * `string::regex_match(string, expr)`: Determines if a regex matches the entire string and returns the matches as an array.
   * `string::regex_search(string, expr)`: Determines if a regex matches part of the string.
+    ```gsc
+    init()
+    {
+        assert(string::to_upper("hello") == "HELLO");
+        assert(string::to_lower("HELLO") == "hello");
+        assert(string::is_numeric("12345"));
+        assert(string::starts_with("hello world", "hello"));
+        assert(string::ends_with("hello world", "world"));
+        assert(string::replace("hello", "e", "o") == "hollo");
+        assert(string::regex_replace("hello", "h|e|l|o", "a") == "aaaaa");
+        assert(string::regex_match("hello", "^hello$").size == 1);
+        assert(string::regex_search("hello", "e|o"));
+    }
+    ```
 ## Misc
   * `array(...)`: Creates an array from a list of arguments:
 
