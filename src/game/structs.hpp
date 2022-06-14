@@ -492,12 +492,19 @@ namespace game
 		float max;
 	};
 
+	struct DvarLimits_integer64
+	{
+		__int64 min;
+		__int64 max;
+	};
+
 	union DvarLimits
 	{
 		$A37BA207B3DDD6345C554D4661813EDD enumeration;
 		$9CA192F9DB66A3CB7E01DE78A0DEA53D integer;
 		$251C2428A496074035CACA7AAF3D55BD value;
 		$251C2428A496074035CACA7AAF3D55BD vector;
+		DvarLimits_integer64 integer64;
 	};
 
 	struct dvar_t
@@ -508,12 +515,17 @@ namespace game
 		unsigned int flags;
 		dvarType_t type;
 		bool modified;
+		bool loadedFromSaveGame;
 		DvarValue current;
 		DvarValue latched;
+		DvarValue saved;
 		DvarValue reset;
 		DvarLimits domain;
 		dvar_t* hashNext;
 	};
+
+	static_assert(offsetof(dvar_t, hashNext) == 104);
+	static_assert(offsetof(dvar_t, current) == 24);
 
 	struct GSC_OBJ
 	{

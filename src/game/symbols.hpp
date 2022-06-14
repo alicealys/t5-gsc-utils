@@ -19,7 +19,7 @@ namespace game
 
 	WEAK symbol<int(const char* fmt, ...)> Com_Printf{0x566BC0, 0x64C260};
 
-	WEAK symbol<const dvar_t*(const char*)> Dvar_FindVar{0x0, 0x0};
+	WEAK symbol<const dvar_t*(const char*)> Dvar_FindVar{0x5AE810, 0x512F70};
 	WEAK symbol<int(const dvar_t*)> Dvar_GetInt{0x0, 0x0};
 	WEAK symbol<dvar_t*(const char* dvarName, int value, int min, int max, 
 		unsigned int flags, const char* description)> Dvar_RegisterInt{0x0, 0x0};

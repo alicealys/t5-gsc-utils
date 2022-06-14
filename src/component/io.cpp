@@ -15,6 +15,9 @@ namespace io
     public:
         void post_unpack() override
         {
+            const auto fs_basegame = game::Dvar_FindVar("fs_basegame");
+            std::filesystem::current_path(fs_basegame->current.string);
+
             gsc::function::add_multiple([](const std::string& file, const std::string& data,
                 const scripting::variadic_args& va)
             {
