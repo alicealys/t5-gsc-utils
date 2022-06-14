@@ -57,7 +57,7 @@ namespace command
 			const scripting::entity player = game::Scr_GetEntityId(game::SCRIPTINSTANCE_SERVER, client_num, 0, 0);
 
 			const auto command = utils::string::to_lower(params[0]);
-			const auto message = params.join(1);
+			const auto message = params.join(1).substr(1);
 
 			for (const auto& callback : chat_callbacks)
 			{

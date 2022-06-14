@@ -65,6 +65,9 @@ namespace game
 
 	VariableValue Scr_GetArrayIndexValue(scriptInstance_t inst, unsigned int name);
 	unsigned int Scr_GetSelf(scriptInstance_t inst, unsigned int threadId);
+
+	void Scr_NotifyId(scriptInstance_t inst, int client_num, unsigned int id, 
+		unsigned int string_value, unsigned int paramcount);
 }
 
 #include "symbols.hpp"

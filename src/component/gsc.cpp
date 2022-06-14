@@ -207,6 +207,18 @@ namespace gsc
 
             return scr_get_builtin_hook.invoke<unsigned int>(inst, func_name);
         }
+
+        // Scr_NotifyId doesn't exist, Scr_NotifyNum_Internal calls FindVariableId to get the variable id from entnum, classnum & clientNum
+        // to not have to recreate Scr_NotifyId we simply make FindVariableId return `entnum` (which in this case will be the id) if `clientNum` == -1
+        unsigned int find_variable_id_stub(int inst, int entnum, unsigned int classnum, int client_num)
+        {
+            if (client_num == -1)
+            {
+                return entnum;
+            }
+
+            return utils::hook::invoke<unsigned int>(SELECT_VALUE(0x5E96E0, 0x40BEF0), inst, entnum, classnum, client_num);
+        }
     }
 
     namespace function
@@ -251,6 +263,8 @@ namespace gsc
             utils::hook::set<char>(SELECT_VALUE(0x9FC5C0 + 40, 0xAABA68 + 40), '\n');
             utils::hook::set<char>(SELECT_VALUE(0x9FC5C0 + 41, 0xAABA68 + 41), '\0');
 
+            utils::hook::call(SELECT_VALUE(0x41D2B5, 0x416325), find_variable_id_stub);
+
             gsc::function::add("array", [](const scripting::variadic_args& va)
             {
                 scripting::array array{};
@@ -267,6 +281,30 @@ namespace gsc
             {
                 return value.type_name();
             }, "typeof", "type");
+
+            gsc::function::add("debug::get_var_count", []()
+            {
+                auto count = 0;
+
+                if (game::environment::is_sp())
+                {
+                    for (auto i = 1; i < 0x5FFE; i++)
+                    {
+                        const auto var = game::scr_VarGlob->variableList_mp[i];
+                        count += var.w.status != 0;
+                    }
+                }
+                else
+                {
+                    for (auto i = 1; i < 0x7FFE; i++)
+                    {
+                        const auto var = game::scr_VarGlob->variableList_mp[i];
+                        count += var.w.status != 0;
+                    }
+                }
+
+                return count;
+            });
         }
     };
 }

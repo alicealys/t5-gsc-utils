@@ -67,6 +67,12 @@ namespace game
 		return utils::hook::invoke<unsigned int>(func, inst);
 	}
 
+	void Scr_NotifyId(scriptInstance_t inst, int /*client_num*/, unsigned int id,
+		unsigned int string_value, unsigned int paramcount)
+	{
+		game::Scr_NotifyNum_Internal(inst, -1, id, 0, string_value, paramcount);
+	}
+
 	VariableValue Scr_GetArrayIndexValue(scriptInstance_t, unsigned int name)
 	{
 		VariableValue value{};

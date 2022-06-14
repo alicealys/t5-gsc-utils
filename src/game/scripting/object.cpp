@@ -63,17 +63,7 @@ namespace scripting
 
 	object::object()
 	{
-		this->id_ = make_object();
-	}
-
-	object::object(std::unordered_map<std::string, script_value> values)
-	{
-		this->id_ = make_object();
-
-		for (const auto& value : values)
-		{
-			this->set(value.first, value.second);
-		}
+		this->id_ = game::AllocObject(game::SCRIPTINSTANCE_SERVER);
 	}
 
 	object::~object()
@@ -157,14 +147,14 @@ namespace scripting
 		return game::Scr_GetSelf(game::SCRIPTINSTANCE_SERVER, this->id_);
 	}
 
-	void object::erase(const std::string& key) const
+	void object::erase(const std::string& /*key*/) const
 	{
-		const auto string_value = game::SL_GetCanonicalString(key.data(), 0);
+		/*const auto string_value = game::SL_GetCanonicalString(key.data(), 0);
 		const auto variable_id = game::FindVariable(game::SCRIPTINSTANCE_SERVER, this->id_, string_value);
 		if (variable_id)
 		{
 			game::RemoveVariableValue(game::SCRIPTINSTANCE_SERVER, this->id_, variable_id);
-		}
+		}*/
 	}
 
 	script_value object::get(const std::string& /*key*/) const
