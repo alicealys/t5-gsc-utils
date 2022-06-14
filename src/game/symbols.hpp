@@ -41,7 +41,7 @@ namespace game
 
 	WEAK symbol<void(scriptInstance_t inst)> Scr_ClearOutParams{0x654D10, 0x588680};
 
-	WEAK symbol<unsigned int(scriptInstance_t inst)> AllocObject{0x0, 0x0};
+	WEAK symbol<unsigned int(scriptInstance_t inst)> AllocObject{0x603400, 0x6970B0};
 	WEAK symbol<unsigned int(scriptInstance_t inst, unsigned int id)> AllocThread{0x69E140, 0x43CA60};
 	WEAK symbol<void(scriptInstance_t inst, unsigned int id)> RemoveRefToObject{0x5517B0, 0x698FA0};
 	WEAK symbol<void(scriptInstance_t inst, const float* vectorValue)> RemoveRefToVector{0x0, 0x0};
@@ -69,7 +69,8 @@ namespace game
 	WEAK symbol<VariableValue(scriptInstance_t inst, unsigned int classnum, int entnum, int clientNum, int offset)> GetEntityFieldValue{0x0, 0x0};
 
 	WEAK symbol<void(gentity_s* ent, unsigned int stringValue, unsigned int paramcount)> Scr_Notify{0x0, 0x0};
-	WEAK symbol<void(scriptInstance_t inst, int clientNum, unsigned int id, unsigned int stringValue, unsigned int paramcount)> Scr_NotifyId{0x0, 0x0};
+	WEAK symbol<void(scriptInstance_t inst, int clientNum, int entnum, 
+		unsigned int classnum, unsigned int stringValue, unsigned int paramcount)> Scr_NotifyNum_Internal{0x41D270, 0x4162E0};
 	WEAK symbol<void(int entnum, unsigned int classnum, unsigned int stringValue, unsigned int paramcount)> Scr_NotifyNum{0x0, 0x0};
 
 	WEAK symbol<unsigned int(const char* str, unsigned int user, scriptInstance_t inst)> SL_GetString{0x463130, 0x4B1770};

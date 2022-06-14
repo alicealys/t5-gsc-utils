@@ -19,8 +19,6 @@ namespace scripting
 		object();
 		object(const unsigned int);
 
-		object(std::unordered_map<std::string, script_value>);
-
 		object(const object& other);
 		object(object&& other) noexcept;
 

@@ -172,11 +172,14 @@ namespace string
 
             gsc::function::add("print", [](const scripting::variadic_args& va)
             {
+                std::string buffer{};
+
                 for (const auto& arg : va)
                 {
-                    printf("%s\t", arg.to_string().data());
+                    buffer.append(utils::string::va("%s\t", arg.to_string().data()));
                 }
-                printf("\n");
+
+                printf("%s\n", buffer.data());
             });
 
             gsc::function::add_multiple(utils::string::to_upper, "toupper", "string::to_upper");

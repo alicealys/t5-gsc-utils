@@ -1,6 +1,6 @@
 #include <stdinc.hpp>
 #include "http.hpp"
-#include <curl/curl.h>
+
 #include <gsl/gsl>
 
 #pragma comment(lib, "ws2_32.lib")
@@ -45,7 +45,8 @@ namespace utils::http
 		}
 	}
 
-	std::optional<std::string> get_data(const std::string& url, const headers& headers, const std::function<void(size_t)>& callback)
+	std::optional<result> get_data(const std::string& url, const std::string& fields,
+		const headers& headers, const std::function<void(size_t)>& callback)
 	{
 		curl_slist* header_list = nullptr;
 		auto* curl = curl_easy_init();
@@ -78,9 +79,27 @@ namespace utils::http
 		curl_easy_setopt(curl, CURLOPT_XFERINFODATA, &helper);
 		curl_easy_setopt(curl, CURLOPT_NOPROGRESS, 0);
 
-		if (curl_easy_perform(curl) == CURLE_OK)
+		if (!fields.empty())
 		{
-			return {std::move(buffer)};
+			curl_easy_setopt(curl, CURLOPT_POSTFIELDS, fields.data());
+		}
+
+		const auto code = curl_easy_perform(curl);
+
+		if (code == CURLE_OK)
+		{
+			result result;
+			result.code = code;
+			result.buffer = std::move(buffer);
+
+			return result;
+		}
+		else
+		{
+			result result;
+			result.code = code;
+
+			return result;
 		}
 
 		if (helper.exception)
@@ -89,13 +108,5 @@ namespace utils::http
 		}
 
 		return {};
-	}
-
-	std::future<std::optional<std::string>> get_data_async(const std::string& url, const headers& headers)
-	{
-		return std::async(std::launch::async, [url, headers]()
-		{
-			return get_data(url, headers);
-		});
 	}
 }
