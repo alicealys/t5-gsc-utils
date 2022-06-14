@@ -86,7 +86,6 @@ namespace bots
 
 	class component final : public component_interface
 	{
-	public:
 		void post_unpack() override
 		{
 			if (game::environment::is_sp())
