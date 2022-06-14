@@ -89,6 +89,11 @@ namespace bots
 	public:
 		void post_unpack() override
 		{
+			if (game::environment::is_sp())
+			{
+				return;
+			}
+
 			// Add custom clantag
 			utils::hook::set<const char*>(0x6B6294, "connect \"\\cg_predictItems\\1\\cl_punkbuster\\0\\cl_anonymous\\0\\color\\4\\head\\default\\model\\multi\\snaps\\20\\rate\\5000\\name\\%s\\clanAbbrev\\3arc\\bdOnlineUserID\\%s\\protocol\\%d\\qport\\%d\"");
 
