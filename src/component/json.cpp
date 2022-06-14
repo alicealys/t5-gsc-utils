@@ -211,8 +211,8 @@ namespace json
 		void post_unpack() override
 		{
 			gsc::function::add_multiple([](const scripting::variadic_args& va)
-            {
-                scripting::array array;
+			{
+				scripting::array array;
 
 				for (auto i = 0u; i < va.size(); i += 2)
 				{
@@ -226,7 +226,7 @@ namespace json
 				}
 
 				return array;
-            }, "createmap", "json::create_map");
+			}, "createmap", "json::create_map");
 
 			gsc::function::add_multiple([](const std::string json)
 			{
