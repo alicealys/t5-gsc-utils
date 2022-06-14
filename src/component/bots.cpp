@@ -1,7 +1,7 @@
 #include <stdinc.hpp>
 #include "loader/component_loader.hpp"
 
-#include "gsc.hpp"
+#include "game/game.hpp"
 
 #include <json.hpp>
 #include <utils/io.hpp>
