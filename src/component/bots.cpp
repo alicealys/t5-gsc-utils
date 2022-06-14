@@ -94,7 +94,8 @@ namespace bots
 			}
 
 			// Add custom clantag
-			utils::hook::set<const char*>(0x6B6294, "connect \"\\cg_predictItems\\1\\cl_punkbuster\\0\\cl_anonymous\\0\\color\\4\\head\\default\\model\\multi\\snaps\\20\\rate\\5000\\name\\%s\\clanAbbrev\\3arc\\bdOnlineUserID\\%s\\protocol\\%d\\qport\\%d\"");
+			utils::hook::set<const char*>(0x6B6294, "connect \"\\cg_predictItems\\1\\cl_punkbuster\\0\\cl_anonymous\\0\\color\\4\\head\\default\\"
+				" model\\multi\\snaps\\20\\rate\\5000\\name\\%s\\clanAbbrev\\3arc\\bdOnlineUserID\\%s\\protocol\\%d\\qport\\%d\"");
 
 			sv_bot_name_random_hook.create(0x49ED80, &sv_bot_name_random_stub);
 			utils::hook::call(0x6B6299, build_connect_string);
