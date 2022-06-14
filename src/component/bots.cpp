@@ -65,8 +65,8 @@ namespace bots
 			return sv_bot_name_random_hook.invoke<const char*>();
 		}
 
-		int build_connect_string(char* buf, const char* connect_string, const char* name, const char* xuid,
-			const char* xnaddr, int protocol, int netfield, int session_mode, int port)
+		int build_connect_string(char* buf, const char* connect_string, const char* name, 
+			const char* bd_online_user_id, int protocol, int qport)
 		{
 			// Default
 			auto clantag = "3arc"s;
@@ -80,7 +80,7 @@ namespace bots
 			}
 
 			return _snprintf_s(buf, 0x400, _TRUNCATE, connect_string, name,
-				clantag.data(), xuid, xnaddr, protocol, netfield, session_mode, port);
+				clantag.data(), bd_online_user_id, protocol, qport);
 		}
 	}
 
@@ -96,7 +96,7 @@ namespace bots
 
 			// Add custom clantag
 			utils::hook::set<const char*>(0x6B6294, "connect \"\\cg_predictItems\\1\\cl_punkbuster\\0\\cl_anonymous\\0\\color\\4\\head\\default\\"
-				" model\\multi\\snaps\\20\\rate\\5000\\name\\%s\\clanAbbrev\\3arc\\bdOnlineUserID\\%s\\protocol\\%d\\qport\\%d\"");
+				" model\\multi\\snaps\\20\\rate\\5000\\name\\%s\\clanAbbrev\\%s\\bdOnlineUserID\\%s\\protocol\\%d\\qport\\%d\"");
 
 			sv_bot_name_random_hook.create(0x49ED80, &sv_bot_name_random_stub);
 			utils::hook::call(0x6B6299, build_connect_string);
