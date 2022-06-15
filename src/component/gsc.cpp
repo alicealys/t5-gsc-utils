@@ -305,6 +305,35 @@ namespace gsc
 
                 return count;
             });
+
+            gsc::function::add("toint", [](const std::string& str, const scripting::variadic_args& va)
+            {
+                auto radix = 10;
+                if (va.size() > 0)
+                {
+                    radix = va[0];
+                }
+
+                return static_cast<int>(std::strtoull(str.data(), nullptr, radix));
+            });
+
+            gsc::function::add("os::date", [](const scripting::variadic_args& va)
+            {
+                std::string format = "%Y-%m-%dT%H:%M:%S%z";
+                if (va.size() > 0)
+                {
+                    format = va[0].as<std::string>();
+                }
+
+                tm ltime{};
+                char timestamp[MAX_PATH] = {0};
+                const auto time = _time64(nullptr);
+
+                _localtime64_s(&ltime, &time);
+                std::strftime(timestamp, sizeof(timestamp) - 1, format.data(), &ltime);
+
+                return std::string(timestamp);
+            });
         }
     };
 }

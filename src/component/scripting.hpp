@@ -11,6 +11,8 @@ namespace scripting
 	extern std::unordered_map<std::string, game::BuiltinMethodDef> method_map;
 	extern std::unordered_map<std::string, game::BuiltinFunctionDef> function_map;
 
+	extern std::unordered_map<unsigned int, std::string> canonical_string_table;
+
 	using script_function = void(*)(game::scr_entref_t);
 
 	void on_shutdown(const std::function<void()>& callback);
