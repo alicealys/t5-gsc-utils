@@ -94,7 +94,7 @@ namespace json
 
 		nlohmann::json gsc_to_json(scripting::script_value value, bool print_id)
 		{
-			const auto variable = value.get_raw();
+			const auto& variable = value.get_raw();
 
 			if (value.is<int>())
 			{
@@ -131,28 +131,24 @@ namespace json
 				return object_to_json(variable.u.uintValue, print_id);
 			}
 
-			if (value.is<scripting::function>())
-			{
-				const auto function = value.as<scripting::function>();
-				return utils::string::va("[[ %s ]]", function.get_name().data());
-			}
-
 			if (variable.type == game::SCRIPT_NONE)
 			{
 				return {};
 			}
 
-			// TODO: scripting component, gsc is way different in BO1 than BO2 :/
+			if (value.is<scripting::function>())
+			{
+				return "[function]";
+			}
+
 			if (variable.type == game::SCRIPT_CODEPOS)
 			{
-				// const auto function = scripting::find_function(variable.u.codePosValue);
-				return utils::string::va("[codepos]");
+				return "[codepos]";
 			}
 
 			if (variable.type == game::SCRIPT_END)
 			{
-				// const auto function = scripting::find_function(variable.u.codePosValue);
-				return utils::string::va("[precodepos]");
+				return "[precodepos]";
 			}
 
 			return utils::string::va("[%s]", value.type_name().data());

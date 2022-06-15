@@ -75,7 +75,7 @@ namespace game
 
 	WEAK symbol<unsigned int(const char* str, unsigned int user, scriptInstance_t inst)> SL_GetString{0x463130, 0x4B1770};
 	WEAK symbol<const char*(unsigned int stringValue, scriptInstance_t inst)> SL_ConvertToString{0x687530, 0x624C70};
-	WEAK symbol<unsigned int(const char* str, bool is_static)> SL_GetCanonicalString{0x0, 0x0};
+	WEAK symbol<unsigned int(scriptInstance_t inst, const char* str)> SL_GetCanonicalString{0x4FB120, 0x68D860};
 
 	WEAK symbol<int(scriptInstance_t inst)> Scr_GetNumParam{0x0, 0x0};
 	WEAK symbol<gentity_s*(scriptInstance_t inst, int index)> Scr_GetEntity{0x0, 0x0};
