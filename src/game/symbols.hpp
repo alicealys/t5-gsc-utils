@@ -8,6 +8,8 @@ namespace game
 
 	WEAK symbol<int(const char* str)> BG_StringHashValue{0x0, 0x0};
 
+	WEAK symbol<void(const char* fmt, ...)> G_LogPrintf{0x69EA30, 0x5CD250};
+
 	WEAK symbol<void(int localClientNum, const char* text)> Cbuf_InsertText{0x0, 0x0};
 	WEAK symbol<void(int localClientNum, const char* text)> Cbuf_AddText{0x49B930, 0x56EF70};
 	WEAK symbol<void(int localClientNum, int controllerIndex, const char* text)> Cmd_ExecuteSingleCommand{0x619D00, 0x50B470};
@@ -17,16 +19,21 @@ namespace game
 
 	WEAK symbol<void(int clientNum)> ClientUserInfoChanged{0x0, 0x0};
 
-	WEAK symbol<int(const char* fmt, ...)> Com_Printf{0x566BC0, 0x64C260};
+	WEAK symbol<void(errorParm_t code, const char* fmt, ...)> Com_Error{0x651D90, 0x627380};
+	WEAK symbol<void(int channel, const char* fmt, ...)> Com_Printf{0x43BF30, 0x4126C0};
+	WEAK symbol<void(const char* fmt, ...)> Com_Printf_NoFilter{0x566BC0, 0x64C260};
+	WEAK symbol<void(int channel, const char* fmt, ...)> Com_PrintWarning{0x51CE50, 0x54B6A0};
 
 	WEAK symbol<const dvar_t*(const char*)> Dvar_FindVar{0x5AE810, 0x512F70};
 	WEAK symbol<int(const dvar_t*)> Dvar_GetInt{0x0, 0x0};
 	WEAK symbol<dvar_t*(const char* dvarName, int value, int min, int max, 
 		unsigned int flags, const char* description)> Dvar_RegisterInt{0x0, 0x0};
+	WEAK symbol<char*(int localClientNum, int bit)> Dvar_InfoString{0x613060, 0x54A8B0};
 
 	WEAK symbol<XAssetHeader(XAssetType type, const char* name, bool errorIfMissing, int waitTime)> DB_FindXAssetHeader{0x0, 0x0};
 
 	WEAK symbol<char*(const char*)> I_CleanStr{0x0, 0x0};
+	WEAK symbol<void(char* dest, const char* src, int destsize)> I_strncpyz{0x5D4D60, 0x5A7140};
 
 	WEAK symbol<void*(const char** pName, int* min_args, int* max_args)> Player_GetMethod{0x0, 0x0};
 	WEAK symbol<void*(const char** pName, int* type, int* min_args, int* max_args)> Scr_GetCommonFunction{0x0, 0x0};
@@ -107,6 +114,9 @@ namespace game
 	WEAK symbol<void*(int valueIndex)> Sys_GetValue{0x67D4F0, 0x529EB0};
 	WEAK symbol<int()> Sys_Milliseconds{0x0, 0x0};
 
+	WEAK symbol<int(const char* qpath, int* f, fsMode_t mode)> FS_FOpenFileByMode{0x4DD530, 0x40C790};
+	WEAK symbol<void(int h)> FS_FCloseFile{0x46CAA0, 0x533020};
+
 	WEAK symbol<void*(jmp_buf* Buf, int Value)> longjmp{0x96B980, 0x9D05C4};
 	WEAK symbol<int(jmp_buf* Buf, int a2)> _setjmp{0x969EAC, 0x9CED5C};
 
@@ -131,4 +141,6 @@ namespace game
 	WEAK symbol<client_s> svs_clients{0x0, 0x0};
 
 	WEAK symbol<CmdArgs> sv_cmd_args{0x243D208, 0x355BD88};
+
+	WEAK symbol<int> logFile{0x1C0417C, 0x3443838};
 }
