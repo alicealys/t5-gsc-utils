@@ -22,6 +22,16 @@ namespace game
 		}
 	}
 
+	void SV_GetServerinfo(char* buffer, int bufferSize)
+	{
+		if (bufferSize < 1)
+		{
+			Com_Error(ERR_DROP, "\x15SV_GetServerinfo: bufferSize == %i", bufferSize);
+		}
+
+		I_strncpyz(buffer, Dvar_InfoString(0, 4), bufferSize);
+	}
+
 	void AddRefToValue(scriptInstance_t inst, const VariableValue* value)
 	{
 		AddRefToValue_(inst, value->type, value->u);

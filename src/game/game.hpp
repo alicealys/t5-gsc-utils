@@ -56,6 +56,8 @@ namespace game
 		T* mp_object_;
 	};
 
+	void SV_GetServerinfo(char* buffer, int bufferSize);
+
 	void AddRefToValue(scriptInstance_t inst, const VariableValue* value);
 	void RemoveRefToValue(scriptInstance_t inst, const int type, VariableUnion value);
 
