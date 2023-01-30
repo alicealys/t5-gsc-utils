@@ -9,6 +9,7 @@ namespace game
 	WEAK symbol<int(const char* str)> BG_StringHashValue{0x0, 0x0};
 
 	WEAK symbol<void(const char* fmt, ...)> G_LogPrintf{0x69EA30, 0x5CD250};
+	WEAK symbol<int(int clientNum)> G_GetClientScore{0x0, 0x4691D0};
 
 	WEAK symbol<void(int localClientNum, const char* text)> Cbuf_InsertText{0x0, 0x0};
 	WEAK symbol<void(int localClientNum, const char* text)> Cbuf_AddText{0x49B930, 0x56EF70};
@@ -34,6 +35,7 @@ namespace game
 
 	WEAK symbol<char*(const char*)> I_CleanStr{0x0, 0x0};
 	WEAK symbol<void(char* dest, const char* src, int destsize)> I_strncpyz{0x5D4D60, 0x5A7140};
+	WEAK symbol<int(const char* str)> I_DrawStrlen{0x0, 0x6A8EF0};
 
 	WEAK symbol<void*(const char** pName, int* min_args, int* max_args)> Player_GetMethod{0x0, 0x0};
 	WEAK symbol<void*(const char** pName, int* type, int* min_args, int* max_args)> Scr_GetCommonFunction{0x0, 0x0};
@@ -53,6 +55,8 @@ namespace game
 	WEAK symbol<void(scriptInstance_t inst, unsigned int id)> RemoveRefToObject{0x5517B0, 0x698FA0};
 	WEAK symbol<void(scriptInstance_t inst, const float* vectorValue)> RemoveRefToVector{0x0, 0x0};
 	WEAK symbol<void(scriptInstance_t inst, const int type, VariableUnion value)> AddRefToValue_{0x53FD50, 0x6706B0};
+
+	WEAK symbol<const char*(netadr_t a)> NET_AdrToString{0x40D790, 0x49F970};
 
 	namespace mp
 	{
@@ -108,8 +112,8 @@ namespace game
 	WEAK symbol<unsigned int(scriptInstance_t inst, unsigned int localId, const char* pos, unsigned int paramcount)> VM_Execute{0x8ACE60, 0x8EADE0};
 
 	WEAK symbol<void(int clientNum, const char* reason)> SV_GameDropClient{0x0, 0x0};
-	WEAK symbol<bool(int clientNum)> SV_IsTestClient{0x0, 0x0};
 	WEAK symbol<void(int clientNum, int type, const char* command)> SV_GameSendServerCommand{0x543CF0, 0x6B8730};
+	WEAK symbol<playerState_s*(int num)> SV_GameClientNum{0x0, 0x6A2570};
 
 	WEAK symbol<void*(int valueIndex)> Sys_GetValue{0x67D4F0, 0x529EB0};
 	WEAK symbol<int()> Sys_Milliseconds{0x0, 0x0};
@@ -138,7 +142,8 @@ namespace game
 	WEAK symbol<gentity_s> g_entities{0x0, 0x0};
 	WEAK symbol<unsigned int> levelEntityId{0x32C86A0, 0x3DCB2A0};
 
-	WEAK symbol<client_s> svs_clients{0x0, 0x0};
+	WEAK symbol<client_s> svs_clients{0x0, 0x372D11C};
+	WEAK symbol<int> svs_time{0x0, 0x372D10C};
 
 	WEAK symbol<CmdArgs> sv_cmd_args{0x243D208, 0x355BD88};
 

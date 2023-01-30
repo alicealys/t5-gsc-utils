@@ -339,6 +339,9 @@ namespace game
 		FL_SUPPORTS_LINKTO = 1 << 12,
 	}; // TODO: Finish
 
+	struct playerState_s
+	{};
+
 	struct gclient_s
 	{
 		char __pad0[0x18];
@@ -372,12 +375,9 @@ namespace game
 	enum netsrc_t
 	{
 		NS_CLIENT1 = 0x0,
-		NS_CLIENT2 = 0x1,
-		NS_CLIENT3 = 0x2,
-		NS_CLIENT4 = 0x3,
-		NS_SERVER = 0x4,
-		NS_PACKET = 0x5,
-		NS_NULL = -1,
+		NS_SERVER = 0x1,
+		NS_MAXCLIENTS = 0x1,
+		NS_PACKET = 0x2,
 	};
 
 	enum netadrtype_t
@@ -391,22 +391,38 @@ namespace game
 
 	struct netadr_t
 	{
-		union
-		{
-			unsigned char ip[4];
-			unsigned int inaddr;
-		};
-		unsigned __int16 port;
 		netadrtype_t type;
-		netsrc_t localNetID;
-		unsigned __int16 serverID;
+		char ip[4];
+		unsigned __int16 port;
+		int addrHandleIndex;
 	};
 
-	static_assert(sizeof(netadr_t) == 0x14);
+	static_assert(sizeof(netadr_t) == 0x10);
+
+	struct netProfilePacket_t
+	{
+		int iTime;
+		int iSize;
+		int bFragment;
+	};
+
+	struct netProfileStream_t
+	{
+		netProfilePacket_t packets[60];
+		int iCurrPacket;
+		int iBytesPerSecond;
+		int iLastBPSCalcTime;
+		int iCountedPackets;
+		int iCountedFragments;
+		int iFragmentPercentage;
+		int iLargestPacket;
+		int iSmallestPacket;
+	};
 
 	struct netProfileInfo_t
 	{
-		unsigned char __pad0[0x5E0];
+		netProfileStream_t send;
+		netProfileStream_t recieve;
 	};
 
 	struct netchan_t
@@ -419,22 +435,19 @@ namespace game
 		int qport;
 		int fragmentSequence;
 		int fragmentLength;
-		unsigned char* fragmentBuffer;
+		char* fragmentBuffer;
 		int fragmentBufferSize;
 		int unsentFragments;
-		int unsentOnLoan;
 		int unsentFragmentStart;
 		int unsentLength;
-		unsigned char* unsentBuffer;
+		char* unsentBuffer;
 		int unsentBufferSize;
 		int reliable_fragments;
-		unsigned char fragment_send_count[128];
+		char fragment_send_count[128];
 		unsigned int fragment_ack[4];
 		int lowest_send_count;
 		netProfileInfo_t prof;
 	};
-
-	static_assert(sizeof(netchan_t) == 0x6C8);
 
 	struct PredictedVehicleDef
 	{
@@ -448,34 +461,49 @@ namespace game
 
 	static_assert(sizeof(PredictedVehicleDef) == 0x38);
 
+	struct PredictedVehicleInfo
+	{
+		bool inVehicle;
+		float origin[3];
+		float angles[3];
+		float tVel[3];
+		float aVel[3];
+	};
+
 	struct clientHeader_t
 	{
-		clientState_t state;
+		int state;
 		int sendAsActive;
 		int deltaMessage;
 		int rateDelayed;
-		int hasAckedBaselineData;
-		int hugeSnapshotSent;
 		netchan_t netchan;
-		vec3_t predictedOrigin;
+		float predictedOrigin[3];
 		int predictedOriginServerTime;
-		int migrationState;
-		PredictedVehicleDef predictedVehicle;
+		PredictedVehicleInfo vehicle;
 	};
 
-	static_assert(sizeof(clientHeader_t) == 0x72C);
+	static_assert(sizeof(clientHeader_t) == 0x714);
 
 	struct client_s
 	{
 		clientHeader_t header;
 		const char* dropReason;
 		char userinfo[1024];
-		unsigned char __pad0[0x3F75C];
+		unsigned char __pad0[0x4A58];
+		char name[32];
+		unsigned char __pad1[0x1D0];
+		int lastPacketTime;
+		unsigned char __pad2[0x445CE];
+		int ping;
+		int rate;
+		unsigned char __pad3[0x10808];
+		int guid;
+		unsigned char __pad4[8];
 		int bIsTestClient;
-		unsigned char __pad1[0xDEF0];
+		unsigned char __pad5[0x21D94];
 	};
 
-	static_assert(sizeof(client_s) == 0x4E180);
+	static_assert(sizeof(client_s) == 0x7C2E8);
 
 	struct cmd_function_t
 	{
@@ -853,5 +881,4 @@ namespace game
 		const char* debugString;
 		void* block;
 	};
-
 }

@@ -87,6 +87,8 @@ namespace bots
 	class component final : public component_interface
 	{
 	public:
+		static_assert(offsetof(game::client_s, bIsTestClient) == 0x5A550);
+
 		void post_unpack() override
 		{
 			if (game::environment::is_sp())

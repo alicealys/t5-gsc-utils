@@ -70,6 +70,8 @@ namespace game
 
 	void Scr_NotifyId(scriptInstance_t inst, int client_num, unsigned int id, 
 		unsigned int string_value, unsigned int paramcount);
+
+	bool SV_IsTestClient(int clientNum);
 }
 
 #include "symbols.hpp"
