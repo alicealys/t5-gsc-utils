@@ -39,13 +39,13 @@ namespace game
 
 	void RemoveRefToValue(scriptInstance_t inst, const int type, VariableUnion value)
 	{
-		if (game::environment::is_mp())
+		if (environment::is_mp())
 		{
 			mp::RemoveRefToValue(inst, type, value);
 		}
 		else
 		{
-			game::VariableValue var{};
+			VariableValue var;
 			var.type = type;
 			var.u = value;
 
@@ -55,14 +55,12 @@ namespace game
 
 	unsigned int GetObjectType(scriptInstance_t, unsigned int id)
 	{
-		if (game::environment::is_sp())
+		if (environment::is_sp())
 		{
-			return game::scr_VarGlob->variableList_sp[id + 1].w.type & 0x1F;
+			return scr_VarGlob->variableList_sp[id + 1].w.type & 0x1F;
 		}
-		else
-		{
-			return game::scr_VarGlob->variableList_mp[id + 1].w.type & 0x1F;
-		}
+
+		return scr_VarGlob->variableList_mp[id + 1].w.type & 0x1F;
 	}
 
 	unsigned int AllocVariable(scriptInstance_t inst)
@@ -75,12 +73,6 @@ namespace game
 		});
 
 		return utils::hook::invoke<unsigned int>(func, inst);
-	}
-
-	void Scr_NotifyId(scriptInstance_t inst, int /*client_num*/, unsigned int id,
-		unsigned int string_value, unsigned int paramcount)
-	{
-		game::Scr_NotifyNum_Internal(inst, -1, id, 0, string_value, paramcount);
 	}
 
 	VariableValue Scr_GetArrayIndexValue(scriptInstance_t, unsigned int name)
@@ -111,13 +103,22 @@ namespace game
 
 	unsigned int Scr_GetSelf(scriptInstance_t, unsigned int threadId)
 	{
-		if (game::environment::is_sp())
+		if (environment::is_sp())
 		{
-			return game::scr_VarGlob->variableList_sp[threadId + 1].u.o.size;
+			return scr_VarGlob->variableList_sp[threadId + 1].u.o.size;
 		}
-		else
-		{
-			return game::scr_VarGlob->variableList_mp[threadId + 1].u.o.u.self;
-		}
+
+		return scr_VarGlob->variableList_mp[threadId + 1].u.o.u.self;
+	}
+
+	void Scr_NotifyId(scriptInstance_t inst, int /*client_num*/, unsigned int id,
+		unsigned int string_value, unsigned int paramcount)
+	{
+		Scr_NotifyNum_Internal(inst, -1, id, 0, string_value, paramcount);
+	}
+
+	bool SV_IsTestClient(int clientNum)
+	{
+		return svs_clients[clientNum].bIsTestClient == 1;
 	}
 }
