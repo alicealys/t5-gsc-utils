@@ -90,12 +90,10 @@ namespace utils::string
 
 	std::string dump_hex(const std::string& data, const std::string& separator = " ");
 
-	void strip(const char* in, char* out, int max);
+	std::string replace(std::string str, const std::string& from, const std::string& to);
 
 	std::string convert(const std::wstring& wstr);
 	std::wstring convert(const std::string& str);
-
-	std::string replace(std::string str, const std::string& from, const std::string& to);
 
 	std::string get_timestamp();
 }

@@ -17,8 +17,6 @@ namespace game
 	WEAK symbol<const char*(int index)> Cmd_Argv{0x0, 0x0};
 	WEAK symbol<void(const char* cmdName)> Cmd_RemoveCommand{0x5F1A90, 0x527EA0};
 
-	WEAK symbol<void(int clientNum)> ClientUserInfoChanged{0x0, 0x0};
-
 	WEAK symbol<void(errorParm_t code, const char* fmt, ...)> Com_Error{0x651D90, 0x627380};
 	WEAK symbol<void(int channel, const char* fmt, ...)> Com_Printf{0x43BF30, 0x4126C0};
 	WEAK symbol<void(const char* fmt, ...)> Com_Printf_NoFilter{0x566BC0, 0x64C260};
@@ -107,9 +105,13 @@ namespace game
 
 	WEAK symbol<unsigned int(scriptInstance_t inst, unsigned int localId, const char* pos, unsigned int paramcount)> VM_Execute{0x8ACE60, 0x8EADE0};
 
+	WEAK symbol<void(int index, char* buffer, int bufferSize)> SV_GetUserinfo{0x50DCD0, 0x6916A0};
 	WEAK symbol<void(int clientNum, const char* reason)> SV_GameDropClient{0x0, 0x0};
 	WEAK symbol<bool(int clientNum)> SV_IsTestClient{0x0, 0x0};
 	WEAK symbol<void(int clientNum, int type, const char* command)> SV_GameSendServerCommand{0x543CF0, 0x6B8730};
+
+	WEAK symbol<void(int clientNum)> ClientDisconnect{0x4F4000, 0x66FA00};
+	WEAK symbol<void(int clientNum)> ClientUserinfoChanged{0x67FFC0, 0x548D80};
 
 	WEAK symbol<void*(int valueIndex)> Sys_GetValue{0x67D4F0, 0x529EB0};
 	WEAK symbol<int()> Sys_Milliseconds{0x0, 0x0};

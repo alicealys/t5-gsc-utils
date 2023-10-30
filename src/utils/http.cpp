@@ -101,12 +101,5 @@ namespace utils::http
 
 			return result;
 		}
-
-		if (helper.exception)
-		{
-			std::rethrow_exception(helper.exception);
-		}
-
-		return {};
 	}
 }

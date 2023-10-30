@@ -35,20 +35,20 @@ namespace utils::string
 
 	std::string to_lower(std::string text)
 	{
-		std::transform(text.begin(), text.end(), text.begin(), [](const char input)
-			{
+		std::transform(text.begin(), text.end(), text.begin(), [](const unsigned char input)
+		{
 				return static_cast<char>(tolower(input));
-			});
+		});
 
 		return text;
 	}
 
 	std::string to_upper(std::string text)
 	{
-		std::transform(text.begin(), text.end(), text.begin(), [](const char input)
-			{
+		std::transform(text.begin(), text.end(), text.begin(), [](const unsigned char input)
+		{
 				return static_cast<char>(toupper(input));
-			});
+		});
 
 		return text;
 	}
@@ -86,34 +86,23 @@ namespace utils::string
 		return result;
 	}
 
-	void strip(const char* in, char* out, int max)
+	std::string replace(std::string str, const std::string& from, const std::string& to)
 	{
-		if (!in || !out) return;
-
-		max--;
-		auto current = 0;
-		while (*in != 0 && current < max)
+		if (from.empty())
 		{
-			const auto color_index = (*(in + 1) - 48) >= 0xC ? 7 : (*(in + 1) - 48);
-
-			if (*in == '^' && (color_index != 7 || *(in + 1) == '7'))
-			{
-				++in;
-			}
-			else
-			{
-				*out = *in;
-				++out;
-				++current;
-			}
-
-			++in;
+			return str;
 		}
-		*out = '\0';
+
+		size_t start_pos = 0;
+		while ((start_pos = str.find(from, start_pos)) != std::string::npos)
+		{
+			str.replace(start_pos, from.length(), to);
+			start_pos += to.length();
+		}
+
+		return str;
 	}
 
-#pragma warning(push)
-#pragma warning(disable: 4100)
 	std::string convert(const std::wstring& wstr)
 	{
 		std::string result;
@@ -138,24 +127,6 @@ namespace utils::string
 		}
 
 		return result;
-	}
-#pragma warning(pop)
-
-	std::string replace(std::string str, const std::string& from, const std::string& to)
-	{
-		if (from.empty())
-		{
-			return str;
-		}
-
-		size_t start_pos = 0;
-		while ((start_pos = str.find(from, start_pos)) != std::string::npos)
-		{
-			str.replace(start_pos, from.length(), to);
-			start_pos += to.length();
-		}
-
-		return str;
 	}
 
 	std::string get_timestamp()
