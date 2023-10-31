@@ -29,7 +29,7 @@ namespace command
 
 		game::CmdArgs* get_cmd_args()
 		{
-			return reinterpret_cast<game::CmdArgs*>(game::Sys_GetValue(4));
+			return static_cast<game::CmdArgs*>(game::Sys_GetValue(4));
 		}
 
 		void main_handler()
@@ -315,7 +315,7 @@ namespace command
 			gsc::method::add("tell", [](const scripting::entity& player, const std::string& msg)
 			{
 				const auto entref = player.get_entity_reference();
-				if (entref.classnum != 0 || entref.entnum >= 18)
+				if (entref.classnum)
 				{
 					throw std::runtime_error("Not a player entity");
 				}
