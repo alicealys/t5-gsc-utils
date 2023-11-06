@@ -46,19 +46,13 @@ namespace gsc
 			scripting::push_value(value);
 		}
 
-		void call_function(const char* name)
+		void call_function(const function_t* function)
 		{
-			if (functions.find(name) == functions.end())
-			{
-				return;
-			}
-
 			const auto args = get_arguments();
-			const auto& function = functions[name];
 
 			try
 			{
-				const auto value = function(args);
+				const auto value = function->operator()(args);
 				return_value(value);
 			}
 			catch (const std::exception& e)
@@ -67,15 +61,9 @@ namespace gsc
 			}
 		}
 
-		void call_method(const char* name, const game::scr_entref_t entref)
+		void call_method(const function_t* method, const game::scr_entref_t entref)
 		{
-			if (methods.find(name) == methods.end())
-			{
-				return;
-			}
-
 			const auto args = get_arguments();
-			const auto& method = methods[name];
 
 			try
 			{
@@ -89,7 +77,7 @@ namespace gsc
 					args_.push_back(arg);
 				}
 
-				const auto value = method(args_);
+				const auto value = method->operator()(args_);
 				return_value(value);
 			}
 			catch (const std::exception& e)
@@ -98,13 +86,12 @@ namespace gsc
 			}
 		}
 
-		void* wrap_function_call(const std::string& name)
+		void* wrap_function_call(const function_t* function)
 		{
-			const auto name_ = utils::memory::get_allocator()->duplicate_string(name);
-			return utils::hook::assemble([name_](utils::hook::assembler& a)
+			return utils::hook::assemble([&](utils::hook::assembler& a)
 			{
 				a.pushad();
-				a.push(name_);
+				a.push(function);
 				a.call(call_function);
 				a.add(esp, 0x4);
 				a.popad();
@@ -113,14 +100,13 @@ namespace gsc
 			});
 		}
 
-		void* wrap_method_call(const std::string& name)
+		void* wrap_method_call(const function_t* method)
 		{
-			const auto name_ = utils::memory::get_allocator()->duplicate_string(name);
-			return utils::hook::assemble([name_](utils::hook::assembler& a)
+			return utils::hook::assemble([&](utils::hook::assembler& a)
 			{
 				a.pushad();
 				a.push(dword_ptr(esp, 0x24));
-				a.push(name_);
+				a.push(method);
 				a.call(call_method);
 				a.add(esp, 0x8);
 				a.popad();
@@ -222,10 +208,11 @@ namespace gsc
 	{
 		void add_internal(const std::string& name, const function_t& function)
 		{
-			const auto name_ = utils::string::to_lower(name);
-			functions[name_] = function;
-			const auto call_wrap = wrap_function_call(name_);
-			function_wraps[name_] = call_wrap;
+			const auto lower = utils::string::to_lower(name);
+			const auto [iterator, was_inserted] = functions.insert(std::make_pair(lower, function));
+			const auto function_ptr = &iterator->second;
+			const auto call_wrap = wrap_function_call(function_ptr);
+			function_wraps[lower] = call_wrap;
 		}
 	}
 
@@ -233,10 +220,11 @@ namespace gsc
 	{
 		void add_internal(const std::string& name, const function_t& method)
 		{
-			const auto name_ = utils::string::to_lower(name);
-			methods[name_] = method;
-			const auto call_wrap = wrap_method_call(name_);
-			method_wraps[name_] = call_wrap;
+			const auto lower = utils::string::to_lower(name);
+			const auto [iterator, was_inserted] = methods.insert(std::make_pair(lower, method));
+			const auto method_ptr = &iterator->second;
+			const auto call_wrap = wrap_method_call(method_ptr);
+			method_wraps[lower] = call_wrap;
 		}
 	}
 
