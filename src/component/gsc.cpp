@@ -12,16 +12,16 @@
 
 namespace gsc
 {
+	std::unordered_map<std::string, function_t> functions;
+	std::unordered_map<std::string, function_t> methods;
+
+	std::unordered_map<std::string, void*> function_wraps;
+	std::unordered_map<std::string, void*> method_wraps;
+
 	namespace
 	{
 		utils::hook::detour get_function_hook;
 		utils::hook::detour get_method_hook;
-
-		std::unordered_map<std::string, function_t> functions;
-		std::unordered_map<std::string, function_t> methods;
-
-		std::unordered_map<std::string, void*> function_wraps;
-		std::unordered_map<std::string, void*> method_wraps;
 
 		std::vector<scripting::script_value> get_arguments()
 		{
@@ -46,80 +46,12 @@ namespace gsc
 			scripting::push_value(value);
 		}
 
-		void call_function(const function_t* function)
-		{
-			const auto args = get_arguments();
-
-			try
-			{
-				const auto value = function->operator()(args);
-				return_value(value);
-			}
-			catch (const std::exception& e)
-			{
-				game::Scr_Error(game::SCRIPTINSTANCE_SERVER, e.what(), false);
-			}
-		}
-
-		void call_method(const function_t* method, const game::scr_entref_t entref)
-		{
-			const auto args = get_arguments();
-
-			try
-			{
-				const scripting::entity entity = game::Scr_GetEntityId(
-					game::SCRIPTINSTANCE_SERVER, entref.entnum, entref.classnum, 0);
-
-				std::vector<scripting::script_value> args_{};
-				args_.push_back(entity);
-				for (const auto& arg : args)
-				{
-					args_.push_back(arg);
-				}
-
-				const auto value = method->operator()(args_);
-				return_value(value);
-			}
-			catch (const std::exception& e)
-			{
-				game::Scr_Error(game::SCRIPTINSTANCE_SERVER, e.what(), false);
-			}
-		}
-
-		void* wrap_function_call(const function_t* function)
-		{
-			return utils::hook::assemble([&](utils::hook::assembler& a)
-			{
-				a.pushad();
-				a.push(function);
-				a.call(call_function);
-				a.add(esp, 0x4);
-				a.popad();
-
-				a.ret();
-			});
-		}
-
-		void* wrap_method_call(const function_t* method)
-		{
-			return utils::hook::assemble([&](utils::hook::assembler& a)
-			{
-				a.pushad();
-				a.push(dword_ptr(esp, 0x24));
-				a.push(method);
-				a.call(call_method);
-				a.add(esp, 0x8);
-				a.popad();
-
-				a.ret();
-			});
-		}
-
 		script_function get_function_stub(const char** name, int* type)
 		{
-			if (function_wraps.find(*name) != function_wraps.end())
+			const auto iter = function_wraps.find(*name);
+			if (iter != function_wraps.end())
 			{
-				return reinterpret_cast<script_function>(function_wraps[*name]);
+				return reinterpret_cast<script_function>(iter->second);
 			}
 
 			return get_function_hook.invoke<script_function>(name, type);
@@ -127,9 +59,10 @@ namespace gsc
 
 		script_function get_method_stub(const char** name, int* type)
 		{
-			if (method_wraps.find(*name) != method_wraps.end())
+			const auto iter = method_wraps.find(*name);
+			if (iter != method_wraps.end())
 			{
-				return reinterpret_cast<script_function>(method_wraps[*name]);
+				return reinterpret_cast<script_function>(iter->second);
 			}
 
 			return get_method_hook.invoke<script_function>(name, type);
@@ -204,27 +137,43 @@ namespace gsc
 		}
 	}
 
-	namespace function
+	void call_function(const function_t* function)
 	{
-		void add_internal(const std::string& name, const function_t& function)
+		const auto args = get_arguments();
+
+		try
 		{
-			const auto lower = utils::string::to_lower(name);
-			const auto [iterator, was_inserted] = functions.insert(std::make_pair(lower, function));
-			const auto function_ptr = &iterator->second;
-			const auto call_wrap = wrap_function_call(function_ptr);
-			function_wraps[lower] = call_wrap;
+			const auto value = function->operator()(args);
+			return_value(value);
+		}
+		catch (const std::exception& e)
+		{
+			game::Scr_Error(game::SCRIPTINSTANCE_SERVER, e.what(), false);
 		}
 	}
 
-	namespace method
+	void call_method(const function_t* method, const game::scr_entref_t entref)
 	{
-		void add_internal(const std::string& name, const function_t& method)
+		const auto args = get_arguments();
+
+		try
 		{
-			const auto lower = utils::string::to_lower(name);
-			const auto [iterator, was_inserted] = methods.insert(std::make_pair(lower, method));
-			const auto method_ptr = &iterator->second;
-			const auto call_wrap = wrap_method_call(method_ptr);
-			method_wraps[lower] = call_wrap;
+			const scripting::entity entity = game::Scr_GetEntityId(
+				game::SCRIPTINSTANCE_SERVER, entref.entnum, entref.classnum, 0);
+
+			std::vector<scripting::script_value> args_{};
+			args_.push_back(entity);
+			for (const auto& arg : args)
+			{
+				args_.push_back(arg);
+			}
+
+			const auto value = method->operator()(args_);
+			return_value(value);
+		}
+		catch (const std::exception& e)
+		{
+			game::Scr_Error(game::SCRIPTINSTANCE_SERVER, e.what(), false);
 		}
 	}
 
