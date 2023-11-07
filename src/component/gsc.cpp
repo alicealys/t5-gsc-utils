@@ -137,13 +137,13 @@ namespace gsc
 		}
 	}
 
-	void call_function(const function_t* function)
+	void call_function(const function_t& function)
 	{
 		const auto args = get_arguments();
 
 		try
 		{
-			const auto value = function->operator()(args);
+			const auto value = function(args);
 			return_value(value);
 		}
 		catch (const std::exception& e)
@@ -152,7 +152,7 @@ namespace gsc
 		}
 	}
 
-	void call_method(const function_t* method, const game::scr_entref_t entref)
+	void call_method(const function_t& method, const game::scr_entref_t entref)
 	{
 		const auto args = get_arguments();
 
@@ -168,7 +168,7 @@ namespace gsc
 				args_.push_back(arg);
 			}
 
-			const auto value = method->operator()(args_);
+			const auto value = method(args_);
 			return_value(value);
 		}
 		catch (const std::exception& e)
