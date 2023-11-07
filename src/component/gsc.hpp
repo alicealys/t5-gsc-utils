@@ -56,8 +56,8 @@ namespace gsc
 		return wrap_function(std::function(f));
 	}
 
-	void call_function(const function_t* function);
-	void call_method(const function_t* method, const game::scr_entref_t entref);
+	void call_function(const function_t& function);
+	void call_method(const function_t& method, const game::scr_entref_t entref);
 
 	namespace function
 	{
@@ -70,7 +70,7 @@ namespace gsc
 
 			const auto lower = utils::string::to_lower(name);
 			static const auto [iterator, was_inserted] = functions.insert(std::make_pair(lower, function));
-			static const auto function_ptr = &iterator->second;
+			static const auto& function_ptr = iterator->second;
 
 			function_wraps[lower] = []()
 			{
@@ -102,7 +102,7 @@ namespace gsc
 
 			const auto lower = utils::string::to_lower(name);
 			static const auto [iterator, was_inserted] = functions.insert(std::make_pair(lower, function));
-			static const auto function_ptr = &iterator->second;
+			static const auto& function_ptr = iterator->second;
 
 			method_wraps[lower] = [](game::scr_entref_t entref)
 			{
