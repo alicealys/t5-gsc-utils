@@ -1,9 +1,9 @@
 # t5-gsc-utils
-T5 version of [t6-gsc-utils](https://github.com/fedddddd/t6-gsc-utils).  
-If you wish for any feature to be added please create an [issue](https://github.com/fedddddd/t5-gsc-utils/issues/new).
+T5 version of [t6-gsc-utils](https://github.com/alicealys/t6-gsc-utils).  
+If you wish for any feature to be added please create an [issue](https://github.com/alicealys/t5-gsc-utils/issues/new).
 
 # Installation
-* Download the latest version from the [releases](https://github.com/fedddddd/t5-gsc-utils/releases)
+* Download the latest version from the [releases](https://github.com/alicealys/t5-gsc-utils/releases)
 * Copy it to `Plutonium/storage/t5/plugins`
 
 # Features
@@ -68,7 +68,7 @@ If you wish for any feature to be added please create an [issue](https://github.
   }
   ```
   
-  More examples can be found [here](https://github.com/fedddddd/t5-gsc-utils/tree/main/src/component)
+  More examples can be found [here](https://github.com/alicealys/t5-gsc-utils/tree/main/src/component)
   
 # Functions & Methods
 
