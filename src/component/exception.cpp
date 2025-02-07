@@ -134,7 +134,7 @@ namespace exception
 	class component final : public component_interface
 	{
 	public:
-		void post_unpack() override
+		void on_startup([[maybe_unused]] plugin::plugin* plugin) override
 		{
 #ifdef DEBUG
 			SetUnhandledExceptionFilter(exception_filter);
@@ -144,4 +144,4 @@ namespace exception
 	};
 }
 
-REGISTER_COMPONENT(exception::component)
+//REGISTER_COMPONENT(exception::component)

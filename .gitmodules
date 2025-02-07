@@ -28,3 +28,6 @@
 [submodule "deps/curl"]
 	path = deps/curl
 	url = https://github.com/curl/curl.git
+[submodule "deps/plutonium-sdk"]
+	path = deps/plutonium-sdk
+	url = https://github.com/plutoniummod/plutonium-sdk.git

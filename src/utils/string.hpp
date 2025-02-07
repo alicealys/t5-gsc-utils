@@ -96,4 +96,6 @@ namespace utils::string
 	std::wstring convert(const std::string& str);
 
 	std::string get_timestamp();
+
+	std::string trim(const std::string& str, const std::string& whitespace = " \t\n\r\f\v");
 }

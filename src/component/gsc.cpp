@@ -180,7 +180,7 @@ namespace gsc
 	class component final : public component_interface
 	{
 	public:
-		void post_unpack() override
+		void on_startup([[maybe_unused]] plugin::plugin* plugin) override
 		{
 			// Don't com_error on gsc errors
 			utils::hook::nop(SELECT_VALUE(0x5A17E1, 0x4D9BB1), 5);

@@ -67,7 +67,7 @@ namespace scripting
 	class component final : public component_interface
 	{
 	public:
-		void post_unpack() override
+		void on_startup([[maybe_unused]] plugin::plugin* plugin) override
 		{
 			g_shutdown_game_hook.create(SELECT_VALUE(0x607700, 0x540950), g_shutdown_game_stub);
 			sl_get_canonical_string_hook.create(SELECT_VALUE(0x5F3F40, 0x622530), sl_transfer_canonical_string_stub);

@@ -70,7 +70,7 @@ namespace user_info
 	class component final : public component_interface
 	{
 	public:
-		void post_unpack() override
+		void on_startup([[maybe_unused]] plugin::plugin* plugin) override
 		{
 			utils::hook::call(SELECT_VALUE(0x5D38EB, 0x4A75E2), sv_get_user_info_stub);
 			utils::hook::call(SELECT_VALUE(0x67FFE9, 0x548DB0), sv_get_user_info_stub);

@@ -13,10 +13,11 @@ namespace io
 	class component final : public component_interface
 	{
 	public:
-		void post_unpack() override
+		void on_startup([[maybe_unused]] plugin::plugin* plugin) override
 		{
-			const auto fs_basegame = game::Dvar_FindVar("fs_basegame");
-			std::filesystem::current_path(fs_basegame->current.string);
+			// TODO: fix this, or is it because pluto does it already?
+			//const auto fs_basegame = game::Dvar_FindVar("fs_basegame");
+			//std::filesystem::current_path(fs_basegame->current.string);
 
 			gsc::function::add_multiple([](const std::string& file, const std::string& data,
 				const scripting::variadic_args& va)

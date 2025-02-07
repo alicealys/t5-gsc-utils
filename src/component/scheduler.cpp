@@ -140,7 +140,7 @@ namespace scheduler
 	class component final : public component_interface
 	{
 	public:
-		void post_unpack() override
+		void on_startup([[maybe_unused]] plugin::plugin* plugin) override
 		{
 			thread = std::thread([]()
 			{
@@ -154,7 +154,7 @@ namespace scheduler
 			server_frame_hook.create(SELECT_VALUE(0x43E340, 0x46B680), server_frame_stub);
 		}
 
-		void pre_destroy() override
+		void on_shutdown([[maybe_unused]] plugin::plugin* plugin) override
 		{
 			kill_thread = true;
 
