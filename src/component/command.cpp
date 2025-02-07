@@ -74,6 +74,11 @@ namespace command
 		void client_command_stub(const int client_num)
 		{
 			params_sv params = {};
+			if (params.size() <= 1 || params[1] == "")
+			{
+				client_command_hook.invoke<void>(client_num);
+				return;
+			}
 
 			const auto command = utils::string::to_lower(params[0]);
 			if ((command == "say" || command == "say_team") &&
