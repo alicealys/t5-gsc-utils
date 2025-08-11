@@ -55,70 +55,21 @@ namespace scripting
 		}
 	}
 
-	array_value::array_value(unsigned int parent_id, unsigned int id)
-		: id_(id)
-		, parent_id_(parent_id)
+	array_value::array_value(const array* array, const script_value& key)
+		: array_(array)
+		, key_(key)
 	{
-		if (!this->id_)
-		{
-			return;
-		}
-
-		game::VariableValue variable_{};
-
-		if (game::environment::is_sp())
-		{
-			const auto variable = &game::scr_VarGlob->variableList_sp[this->id_ + 0x6000];
-			variable_.type = variable->w.type & 0x1F;
-			variable_.u = variable->u.u;
-		}
-		else
-		{
-			const auto variable = &game::scr_VarGlob->variableList_mp[this->id_ + 0x8000];
-			variable_.type = variable->w.type & 0x1F;
-			variable_.u = variable->u.u;
-		}
-
-		this->value_ = variable_;
+		const auto value = this->array_->get(key);
+		this->script_value::operator=(value);
 	}
 
 	void array_value::operator=(const script_value& value)
 	{
-		if (!this->id_)
-		{
-			return;
-		}
-
-		const auto& value_0 = value.get_raw();
-
-		game::VariableValue previous{};
-
-		if (game::environment::is_sp())
-		{
-			const auto variable = &game::scr_VarGlob->variableList_sp[this->id_ + 0x6000];
-			previous.type = variable->w.type & 0x1F;
-			previous.u = variable->u.u;
-
-			variable->w.type |= value_0.type;
-			variable->u.u = value_0.u;
-		}
-		else
-		{
-			const auto variable = &game::scr_VarGlob->variableList_mp[this->id_ + 0x8000];
-			previous.type = variable->w.type & 0x1F;
-			previous.u = variable->u.u;
-
-			variable->w.type |= value_0.type;
-			variable->u.u = value_0.u;
-		}
-
-		game::AddRefToValue(game::SCRIPTINSTANCE_SERVER, &value_0);
-		game::RemoveRefToValue(game::SCRIPTINSTANCE_SERVER, previous.type, previous.u);
-
-		this->value_ = value_0;
+		this->array_->set(this->key_, value);
+		this->script_value::operator=(value);
 	}
 
-	array::array(const unsigned int id)
+	array::array(const std::uint32_t id)
 		: id_(id)
 	{
 		this->add();
@@ -198,18 +149,18 @@ namespace scripting
 		return SELECT_VALUE(get_keys_sp, get_keys_mp)(this->id_);
 	}
 
-	int array::size() const
+	std::uint32_t array::size() const
 	{
 		return static_cast<int>(game::Scr_GetSelf(game::SCRIPTINSTANCE_SERVER, this->id_));
 	}
 
-	unsigned int array::push(const script_value& value) const
+	std::uint32_t array::push_back(const script_value& value) const
 	{
 		this->set(this->size(), value);
 		return this->size();
 	}
 
-	void array::erase(const unsigned int index) const
+	void array::erase(const std::uint32_t index) const
 	{
 		const auto variable_id = game::FindArrayVariable(game::SCRIPTINSTANCE_SERVER, this->id_, index);
 		if (variable_id)
@@ -226,13 +177,6 @@ namespace scripting
 		{
 			game::RemoveVariableValue(game::SCRIPTINSTANCE_SERVER, this->id_, variable_id);
 		}
-	}
-
-	script_value array::pop() const
-	{
-		const auto value = this->get(this->size() - 1);
-		this->erase(this->size() - 1);
-		return value;
 	}
 
 	script_value array::get(const std::string& key) const
@@ -261,6 +205,24 @@ namespace scripting
 		}
 
 		return variable_;
+	}
+
+	void array::erase(const script_value& key) const
+	{
+		if (key.is<int>())
+		{
+			return this->erase(key.as<int>());
+		}
+
+		if (key.is<std::string>())
+		{
+			return this->erase(key.as<std::string>());
+		}
+	}
+
+	void array::erase(const array_iterator& iter) const
+	{
+		this->erase(iter->first);
 	}
 
 	script_value array::get(const unsigned int index) const
@@ -294,15 +256,15 @@ namespace scripting
 	{
 		if (key.is<int>())
 		{
-			this->get(key.as<int>());
+			return this->get(key.as<int>());
 		}
 
 		if (key.is<std::string>())
 		{
-			this->get(key.as<std::string>());
+			return this->get(key.as<std::string>());
 		}
 
-		return {};
+		throw std::runtime_error(std::format("invalid key type '{}'", key.type_name()));
 	}
 
 	void array::set(const std::string& key, const script_value& value) const
@@ -340,7 +302,7 @@ namespace scripting
 		game::RemoveRefToValue(game::SCRIPTINSTANCE_SERVER, previous.type, previous.u);
 	}
 
-	void array::set(const unsigned int index, const script_value& value) const
+	void array::set(const std::uint32_t index, const script_value& value) const
 	{
 		const auto& value_ = value.get_raw();
 		const auto variable_id = this->get_value_id(index);
@@ -375,25 +337,27 @@ namespace scripting
 		game::RemoveRefToValue(game::SCRIPTINSTANCE_SERVER, previous.type, previous.u);
 	}
 
-	void array::set(const script_value& key, const script_value& _value) const
+	void array::set(const script_value& key, const script_value& value) const
 	{
 		if (key.is<int>())
 		{
-			this->set(key.as<int>(), _value);
+			return this->set(key.as<int>(), value);
 		}
 
 		if (key.is<std::string>())
 		{
-			this->set(key.as<std::string>(), _value);
+			return this->set(key.as<std::string>(), value);
 		}
+
+		throw std::runtime_error(std::format("invalid key type '{}'", key.type_name()));
 	}
 
-	unsigned int array::get_entity_id() const
+	std::uint32_t array::get_entity_id() const
 	{
 		return this->id_;
 	}
 
-	unsigned int array::get_value_id(const std::string& key) const
+	std::uint32_t array::get_value_id(const std::string& key) const
 	{
 		const auto string_value = game::SL_GetString(key.data(), 0, game::SCRIPTINSTANCE_SERVER);
 		const auto variable_id = game::FindVariable(game::SCRIPTINSTANCE_SERVER, this->id_, string_value);
@@ -406,7 +370,7 @@ namespace scripting
 		return variable_id;
 	}
 
-	unsigned int array::get_value_id(const unsigned int index) const
+	std::uint32_t array::get_value_id(const std::uint32_t index) const
 	{
 		const auto variable_id = game::FindArrayVariable(game::SCRIPTINSTANCE_SERVER, this->id_, index);
 		if (!variable_id)
@@ -420,5 +384,35 @@ namespace scripting
 	entity array::get_raw() const
 	{
 		return entity(this->id_);
+	}
+
+	array_value array::operator[](const script_value& key) const
+	{
+		return array_value(this, key);
+	}
+
+	array_iterator array::begin() const
+	{
+		const auto keys = this->get_keys();
+		return array_iterator(this, keys, 0);
+	}
+
+	array_iterator array::end() const
+	{
+		return array_iterator(this);
+	}
+
+	array_iterator array::find(const script_value& key) const
+	{
+		const auto keys = this->get_keys();
+		for (auto i = 0u; i < keys.size(); i++)
+		{
+			if (keys[i] == key)
+			{
+				return array_iterator(this, keys, i);
+			}
+		}
+
+		return array_iterator(this);
 	}
 }

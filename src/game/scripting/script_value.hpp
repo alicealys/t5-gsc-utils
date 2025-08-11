@@ -137,9 +137,20 @@ namespace scripting
 		template <typename T>
 		T get() const
 		{
-			if (std::is_constructible<T, std::string>::value && this->is<std::string>()) \
+			if constexpr (std::is_pointer<T>::value)
 			{
-				return T(this->as<std::string>());
+				if (this->is<unsigned int>())
+				{
+					return reinterpret_cast<T>(this->as<unsigned int>());
+				}
+			}
+
+			if constexpr (std::is_constructible<T, std::string>::value)
+			{
+				if (this->is<std::string>())
+				{
+					return T(this->as<std::string>());
+				}
 			}
 
 			throw std::runtime_error("Invalid type");
@@ -157,7 +168,15 @@ public: \
 		template <typename T>
 		bool is() const
 		{
-			if (std::is_constructible<T, std::string>::value && this->is<std::string>()) \
+			if constexpr (std::is_pointer<T>::value)
+			{
+				if (this->is<unsigned int>())
+				{
+					return true;
+				}
+			}
+
+			if (std::is_constructible<T, std::string>::value && this->is<std::string>())
 			{
 				return true;
 			}
@@ -168,7 +187,9 @@ public: \
 		ADD_TYPE(bool)
 		ADD_TYPE(int)
 		ADD_TYPE(unsigned int)
+		ADD_TYPE(unsigned short)
 		ADD_TYPE(float)
+		ADD_TYPE(float*)
 		ADD_TYPE(double)
 		ADD_TYPE(const char*)
 		ADD_TYPE(std::string)
@@ -193,6 +214,17 @@ public: \
 			return get<T>();
 		}
 
+		template <typename T>
+		T as_or(const T& default_value) const
+		{
+			if (!this->is<T>())
+			{
+				return default_value;
+			}
+
+			return get<T>();
+		}
+
 		std::string type_name() const
 		{
 			return get_typename(this->get_raw());
@@ -205,7 +237,7 @@ public: \
 
 			for (const auto& value : container)
 			{
-				array_.push(value);
+				array_.emplace_back(value);
 			}
 
 			game::VariableValue value{};
@@ -222,6 +254,14 @@ public: \
 		}
 
 		std::string to_string() const;
+
+		friend bool operator==(const script_value& a, const script_value& b)
+		{
+			const auto& value_raw_a = a.get_raw();
+			const auto& value_raw_b = b.get_raw();
+
+			return value_raw_a.type != value_raw_b.type && value_raw_a.u.uintValue == value_raw_b.u.uintValue;
+		}
 
 		const game::VariableValue& get_raw() const;
 
@@ -265,14 +305,29 @@ public: \
 			}
 		}
 
+		template <typename T, typename I = int>
+		T* as_ptr() const
+		{
+			const auto value = script_value::as<I>();
+
+			if (value == nullptr)
+			{
+				throw std::runtime_error("is null");
+			}
+
+			return reinterpret_cast<T*>(value);
+		}
+
 		template <>
 		variadic_args as() const
 		{
 			variadic_args args{this->index_};
+
 			for (auto i = this->index_; i < this->values_.size(); i++)
 			{
-				args.push_back({this->values_, this->values_[i], i, true});
+				args.emplace_back(this->values_, this->values_[i], i, true);
 			}
+
 			return args;
 		}
 
@@ -285,7 +340,7 @@ public: \
 		operator C<T, std::allocator<T>>() const
 		{
 			const auto container_type = get_c_typename<C<T, std::allocator<T>>>();
-			if (!script_value::as<ArrayType>())
+			if (!script_value::is<ArrayType>())
 			{
 				const auto type = get_typename(this->get_raw());
 
@@ -297,15 +352,15 @@ public: \
 
 			C<T, std::allocator<T>> container{};
 			const auto array = script_value::as<ArrayType>();
-			for (auto i = 0; i < array.size(); i++)
+			for (auto i = 0u; i < array.size(); i++)
 			{
 				try
 				{
-					container.push_back(array.get(i).as<T>());
+					container.emplace_back(array.get(i).as<T>());
 				}
 				catch (const std::exception& e)
 				{
-					throw std::runtime_error(utils::string::va("element %d of parameter %d of type '%s' %s", 
+					throw std::runtime_error(utils::string::va("element %d of parameter %d of type '%s' %s",
 						i, this->index_, container_type.data(), e.what()));
 				}
 			}
@@ -323,6 +378,7 @@ public: \
 		arguments values_{};
 		size_t index_{};
 		bool exists_{};
+
 	};
 
 	class function_arguments
@@ -330,16 +386,14 @@ public: \
 	public:
 		function_arguments(const arguments& values);
 
-		function_argument operator[](const size_t index) const
-		{
-			if (index >= values_.size())
-			{
-				return {values_, {}, index, false};
-			}
+		function_argument operator[](const size_t index) const;
 
-			return {values_, values_[index], index, true};
-		}
+		arguments get_raw() const;
+
+		size_t size() const;
+
 	private:
 		arguments values_{};
+
 	};
 }

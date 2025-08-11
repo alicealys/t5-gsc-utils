@@ -77,19 +77,25 @@ workspace "t5-gsc-utils"
 			"./src/**.h",
 			"./src/**.hpp",
 			"./src/**.cpp",
+			"./src/**.rc",
 		}
 
 		includedirs 
 		{
 			"%{prj.location}/src",
 			"./src",
+			"./deps/mysql/include"
 		}
+
+		libdirs {"./deps/mysql/lib"}
 
 		resincludedirs 
 		{
 			"$(ProjectDir)src"
 		}
-	
+
+		linkoptions {"/DELAYLOAD:libmysql.dll"}
+
 		pchheader "stdinc.hpp"
 		pchsource "src/stdinc.cpp"
 

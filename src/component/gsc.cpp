@@ -205,7 +205,7 @@ namespace gsc
 
 				for (const auto& arg : va)
 				{
-					array.push(arg);
+					array.emplace_back(arg);
 				}
 
 				return array;

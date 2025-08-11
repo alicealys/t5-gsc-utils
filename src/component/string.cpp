@@ -1,13 +1,7 @@
 #include <stdinc.hpp>
 #include "loader/component_loader.hpp"
 
-#include "game/structs.hpp"
-#include "game/game.hpp"
-
 #include "gsc.hpp"
-
-#include <utils/io.hpp>
-#include <uchar.h>
 
 // lua/lstrlib.c
 #define MAX_FORMAT	32
@@ -22,7 +16,7 @@ namespace string
 	namespace
 	{
 		// lua/lstrlib.c
-		const char* getformat(const char* strfrmt, char* form) 
+		const char* getformat(const char* strfrmt, char* form)
 		{
 			const auto len = std::strspn(strfrmt, L_FMTFLAGSF "123456789.") + 1;
 			if (len >= MAX_FORMAT - 10)
@@ -37,9 +31,9 @@ namespace string
 		}
 
 		// lua/lstrlib.c
-		const char* get_2_digits(const char* s) 
+		const char* get_2_digits(const char* s)
 		{
-			if (isdigit(static_cast<unsigned char>(*s))) 
+			if (isdigit(static_cast<unsigned char>(*s)))
 			{
 				s++;
 				if (isdigit(static_cast<unsigned char>(*s)))
@@ -52,14 +46,14 @@ namespace string
 		}
 
 		// lua/lstrlib.c
-		void check_format(const char* form, const char* flags, int precision) 
+		void check_format(const char* form, const char* flags, int precision)
 		{
 			const char* spec = form + 1;
 			spec += std::strspn(spec, flags);
-			if (*spec != '0') 
+			if (*spec != '0')
 			{
 				spec = get_2_digits(spec);
-				if (*spec == '.' && precision) 
+				if (*spec == '.' && precision)
 				{
 					spec++;
 					spec = get_2_digits(spec);
@@ -110,13 +104,13 @@ namespace string
 					case 'X':
 						flags = L_FMTFLAGSX;
 					intcase:
-					{
-						check_format(form, flags, 1);
-						const auto value = va[va_index].as<int>();
-						buffer.append(utils::string::va(form, value));
-						va_index++;
-						break;
-					}
+						{
+							check_format(form, flags, 1);
+							const auto value = va[va_index].as<int>();
+							buffer.append(utils::string::va(form, value));
+							va_index++;
+							break;
+						}
 					case 'f':
 					case 'F':
 					case 'e':
@@ -157,12 +151,13 @@ namespace string
 		}
 	}
 
+
 	class component final : public component_interface
 	{
 	public:
 		void on_startup([[maybe_unused]] plugin::plugin* plugin) override
 		{
-			gsc::function::add_multiple(format_string, "va", "string::va", 
+			gsc::function::add_multiple(format_string, "va", "string::va",
 				"formatstring", "string::format", "sprintf");
 
 			gsc::function::add("printf", [](const std::string& fmt, const scripting::variadic_args& va)
@@ -190,7 +185,7 @@ namespace string
 			gsc::function::add("string::ends_with", utils::string::ends_with);
 			gsc::function::add("string::replace", utils::string::replace);
 
-			gsc::function::add("string::regex_replace", [](const std::string& str, const std::regex& expr, 
+			gsc::function::add("string::regex_replace", [](const std::string& str, const std::regex& expr,
 				const std::string& with)
 			{
 				return std::regex_replace(str, expr, with);
@@ -205,7 +200,7 @@ namespace string
 				{
 					for (const auto& s : match)
 					{
-						array_match.push((s.str()));
+						array_match.emplace_back((s.str()));
 					}
 				}
 
