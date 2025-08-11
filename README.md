@@ -201,3 +201,91 @@ A list of all the functions and methods that are added by this plugin.
         assert(type(array()) == "array");
     }
     ```
+## MySQL
+
+You can access a mysql database using the following functions:
+
+* `mysql::set_config(config)`: Must be called before calling other mysql functions, config should be a struct of this kind:
+  
+  ```gsc
+  init()
+  {
+      config = spawnstruct();
+      config.host = "localhost";
+      config.user = "root";
+      config.password = "password";
+      config.port = 3306;
+      config.database = "database_name";
+      mysql::set_config(config);
+  }
+  ```
+* `mysql::query(query)`: Executes an sql statement, returns a query object:
+
+  ```gsc
+  init()
+  {
+      // call mysql::set_config
+
+      query = mysql::execute("select * from `players` where guid=1");
+      query waittill("done", result);
+      if (result.size > 0)
+      {
+          print("player name " + result[0]["name"]);
+      }
+  }
+  ```
+* `mysql::prepared_statement(query: string, params...)`: Executes a prepared statement, params can be a list of arguments or an array:
+  
+  ```gsc
+  init()
+  {
+      // call mysql::set_config
+
+      // use variadic args for the parameters
+      {
+          query = mysql::prepared_statement("insert into `players` (`guid`, `name`) values (?, ?)", 123, "foo");
+          query waittill("done", result, affected_rows, error);
+      }
+
+      // use an array for the parameters
+      {
+          params = array(123, "foo");
+          query = mysql::prepared_statement("insert into `players` (`guid`, `name`) values (?, ?)", params);
+          query waittill("done", result, affected_rows, error);
+      }
+  }
+  ```
+## Int64
+These int64 functions allow you to use int64 values within GSC, which normally only supports 32 bit integers.  
+This is useful if you store int64 values in a file or a database and need to access them from GSC.  
+The values are stored as strings but all the functions below can take either a string or int for an int64 argument.  
+`int64` represents a value that is either a `string` or an `int`.  
+* `int64::op(a: int64, op: string, b: int64): int64|bool`: Performs an operation between 2 int64 values (stored as strings)
+  ```gsc
+  {
+      result = int64::op("2583528945238953952", "+", "12039152933205235");
+      assert(result == "2595568098172159187");
+
+      result = int64::op("5834258295282538925", ">", 1);
+      assert(result == true);
+  }
+  ```
+  List of supported operators:
+    * `+`
+    * `-`
+    * `*`
+    * `/`
+    * `&`
+    * `^`
+    * `|`
+    * `~`
+    * `%`
+    * `>>`
+    * `<<`
+    * `++`
+    * `--`
+* `int64::is_int(value: int64): bool`: Returns true if an int64 value fits within an int32 value.
+* `int64::to_int(value: int64): int`: Converts an int64 value to an int32 value.
+* `int64::min(a: int64, b: int64): int64`: Returns the minimum between 2 int64 values.
+* `int64::max(a: int64, b: int64): int64`: Returns the maximum between 2 int64 values.
+  
