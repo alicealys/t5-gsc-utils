@@ -288,7 +288,7 @@ namespace command
 
 						for (auto i = 0; i < params.size(); i++)
 						{
-							array.push(params[i]);
+							array.emplace_back(params[i]);
 						}
 
 						function({array});
@@ -309,7 +309,7 @@ namespace command
 
 						for (auto i = 0; i < params.size(); i++)
 						{
-							array.push(params[i]);
+							array.emplace_back(params[i]);
 						}
 
 						function(player, {array});

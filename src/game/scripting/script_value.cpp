@@ -148,7 +148,25 @@ namespace scripting
 	}
 
 	template <>
+	bool script_value::is<unsigned short>() const
+	{
+		return this->is<int>();
+	}
+
+	template <>
 	bool script_value::is<bool>() const
+	{
+		return this->is<int>();
+	}
+
+	template <>
+	bool script_value::is<short>() const
+	{
+		return this->is<int>();
+	}
+
+	template <>
+	bool script_value::is<char>() const
 	{
 		return this->is<int>();
 	}
@@ -171,6 +189,24 @@ namespace scripting
 		return this->get_raw().u.uintValue != 0;
 	}
 
+	template <>
+	unsigned short script_value::get() const
+	{
+		return static_cast<unsigned short>(this->get_raw().u.uintValue);
+	}
+
+	template <>
+	short script_value::get() const
+	{
+		return static_cast<short>(this->get_raw().u.intValue);
+	}
+
+	template <>
+	char script_value::get() const
+	{
+		return static_cast<char>(this->get_raw().u.intValue);
+	}
+
 	/***********************************************
 	 * Float
 	 **********************************************/
@@ -178,7 +214,8 @@ namespace scripting
 	template <>
 	bool script_value::is<float>() const
 	{
-		return this->get_raw().type == game::SCRIPT_FLOAT;
+		const auto type = this->get_raw().type;
+		return type == game::SCRIPT_FLOAT || type == game::SCRIPT_INTEGER;
 	}
 
 	template <>
@@ -190,12 +227,24 @@ namespace scripting
 	template <>
 	float script_value::get() const
 	{
+		const auto type = this->get_raw().type;
+		if (type == game::SCRIPT_INTEGER)
+		{
+			return static_cast<float>(this->get_raw().u.intValue);
+		}
+
 		return this->get_raw().u.floatValue;
 	}
 
 	template <>
 	double script_value::get() const
 	{
+		const auto type = this->get_raw().type;
+		if (type == game::SCRIPT_INTEGER)
+		{
+			return static_cast<double>(this->get_raw().u.intValue);
+		}
+
 		return static_cast<double>(this->get_raw().u.floatValue);
 	}
 
@@ -321,6 +370,12 @@ namespace scripting
 	}
 
 	template <>
+	bool script_value::is<float*>() const
+	{
+		return this->is<vector>();
+	}
+
+	template <>
 	vector script_value::get() const
 	{
 		return this->get_raw().u.vectorValue;
@@ -412,5 +467,25 @@ namespace scripting
 		}
 
 		return std::vector<function_argument>::operator[](index);
+	}
+
+	function_argument function_arguments::operator[](const size_t index) const
+	{
+		if (index >= values_.size())
+		{
+			return {values_, {}, index, false};
+		}
+
+		return {values_, values_[index], index, true};
+	}
+
+	arguments function_arguments::get_raw() const
+	{
+		return this->values_;
+	}
+
+	size_t function_arguments::size() const
+	{
+		return this->values_.size();
 	}
 }

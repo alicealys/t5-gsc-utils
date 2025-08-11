@@ -136,12 +136,12 @@ namespace exception
 	public:
 		void on_startup([[maybe_unused]] plugin::plugin* plugin) override
 		{
-#ifdef DEBUG
+//#ifdef DEBUG
 			SetUnhandledExceptionFilter(exception_filter);
 			utils::hook::jump(reinterpret_cast<uintptr_t>(&SetUnhandledExceptionFilter), set_unhandled_exception_filter_stub);
-#endif
+//#endif
 		}
 	};
 }
 
-//REGISTER_COMPONENT(exception::component)
+REGISTER_COMPONENT(exception::component)

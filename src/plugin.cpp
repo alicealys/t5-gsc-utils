@@ -45,11 +45,11 @@ namespace plugin
 	{
 		this->interface_ = interface_ptr;
 		this->game_ = game;
-		//utils::hook::jump(reinterpret_cast<uintptr_t>(&printf), printf_stub);
+		utils::hook::jump(reinterpret_cast<uintptr_t>(&printf), printf_stub);
 
 		component_loader::on_startup();
-		//interface_ptr->callbacks()->on_dvar_init(&component_loader::on_dvar_init);
-		//interface_ptr->callbacks()->on_after_dvar_init(&component_loader::on_after_dvar_init);
+		interface_ptr->callbacks()->on_dvar_init(&component_loader::on_dvar_init);
+		interface_ptr->callbacks()->on_after_dvar_init(&component_loader::on_after_dvar_init);
 	}
 
 	void plugin::on_shutdown()
