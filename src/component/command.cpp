@@ -11,7 +11,6 @@
 #include <utils/string.hpp>
 #include <utils/memory.hpp>
 #include <utils/hook.hpp>
-#include <utils/flags.hpp>
 
 namespace command
 {
@@ -272,10 +271,7 @@ namespace command
 		{
 			scripting::on_shutdown(clear);
 
-			if (!utils::flags::has_flag("disable-client-command"))
-			{
-				client_command_hook.create(SELECT_VALUE(0x4AF770, 0x63DB70), client_command_stub);
-			}
+			client_command_hook.create(SELECT_VALUE(0x4AF770, 0x63DB70), client_command_stub);
 
 			gsc::function::add_multiple([](const std::string& command)
 			{

@@ -126,6 +126,7 @@ namespace gsc
 
 		// Scr_NotifyId doesn't exist, Scr_NotifyNum_Internal calls FindVariableId to get the variable id from entnum, classnum & clientNum
 		// to not have to recreate Scr_NotifyId we simply make FindVariableId return `entnum` (which in this case will be the id) if `clientNum` == -1
+		std::size_t find_variable_id_stub_plutonium = 0;
 		unsigned int find_variable_id_stub(int inst, int entnum, unsigned int classnum, int client_num)
 		{
 			if (client_num == -1)
@@ -133,7 +134,7 @@ namespace gsc
 				return entnum;
 			}
 
-			return utils::hook::invoke<unsigned int>(SELECT_VALUE(0x5E96E0, 0x40BEF0), inst, entnum, classnum, client_num);
+			return utils::hook::invoke<unsigned int>(find_variable_id_stub_plutonium, inst, entnum, classnum, client_num);
 		}
 	}
 
@@ -197,6 +198,7 @@ namespace gsc
 			utils::hook::set<char>(SELECT_VALUE(0x9FC5C0 + 40, 0xAABA68 + 40), '\n');
 			utils::hook::set<char>(SELECT_VALUE(0x9FC5C0 + 41, 0xAABA68 + 41), '\0');
 
+			find_variable_id_stub_plutonium = utils::hook::extract<size_t>(SELECT_VALUE(0x41D2B5, 0x416325) + 1);
 			utils::hook::call(SELECT_VALUE(0x41D2B5, 0x416325), find_variable_id_stub);
 
 			gsc::function::add("array", [](const scripting::variadic_args& va)
