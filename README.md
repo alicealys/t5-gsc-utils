@@ -226,7 +226,7 @@ You can access a mysql database using the following functions:
   {
       // call mysql::set_config
 
-      query = mysql::execute("select * from `players` where guid=1");
+      query = mysql::query("select * from `players` where guid=1");
       query waittill("done", result);
       if (result.size > 0)
       {
