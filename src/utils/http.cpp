@@ -9,32 +9,6 @@ namespace utils::http
 {
 	namespace
 	{
-		struct progress_helper
-		{
-			const std::function<void(size_t)>* callback{};
-			std::exception_ptr exception{};
-		};
-
-		int progress_callback(void* clientp, const curl_off_t /*dltotal*/, const curl_off_t dlnow, const curl_off_t /*ultotal*/, const curl_off_t /*ulnow*/)
-		{
-			auto* helper = static_cast<progress_helper*>(clientp);
-
-			try
-			{
-				if (*helper->callback)
-				{
-					(*helper->callback)(static_cast<size_t>(dlnow));
-				}
-			}
-			catch (...)
-			{
-				helper->exception = std::current_exception();
-				return -1;
-			}
-
-			return 0;
-		}
-
 		size_t write_callback(void* contents, const size_t size, const size_t nmemb, void* userp)
 		{
 			const auto buffer = static_cast<std::string*>(userp);

@@ -57,7 +57,7 @@ namespace http
 
 			if (result.buffer.size() >= max_result_size)
 			{
-				printf("^3WARNING: http result size bigger than %i bytes (%i), truncating!", max_result_size, 
+				printf("^3WARNING: http result size bigger than %i bytes (%i), truncating!", max_result_size,
 					static_cast<int>(result.buffer.size()));
 				result.buffer.resize(max_result_size);
 			}
@@ -92,9 +92,9 @@ namespace http
 			scheduler::thread_pool.push([request]
 			{
 				request->result = utils::http::get_data(
-					request->params.url, 
-					request->params.fields, 
-					request->params.headers, 
+					request->params.url,
+					request->params.fields,
+					request->params.headers,
 					request->params.method);
 				request->completed = true;
 			});
@@ -120,6 +120,61 @@ namespace http
 			}
 
 			requests.clear();
+		}
+
+		void parse_request_options(http_request_params_t& params, const scripting::array& options)
+		{
+			const auto fields = options["parameters"];
+			const auto body = options["body"];
+			const auto headers = options["headers"];
+			const auto method = options["method"];
+
+			if (method.is<std::string>())
+			{
+				params.method = method.as<std::string>();
+			}
+
+			if (fields.is<scripting::array>())
+			{
+				const auto fields_ = fields.as<scripting::array>();
+				const auto keys = fields_.get_keys();
+
+				for (const auto& key : keys)
+				{
+					if (!key.is<std::string>())
+					{
+						continue;
+					}
+
+					const auto key_ = key.as<std::string>();
+					const auto value = fields_[key].to_string();
+					params.fields += key_ + "=" + value + "&";
+				}
+
+			}
+			else if (body.is<std::string>())
+			{
+				params.fields = body.as<std::string>();
+			}
+
+			if (headers.is<scripting::array>())
+			{
+				const auto headers_arr = headers.as<scripting::array>();
+				const auto keys = headers_arr.get_keys();
+
+				for (const auto& key : keys)
+				{
+					if (!key.is<std::string>())
+					{
+						continue;
+					}
+
+					const auto key_str = key.as<std::string>();
+					const auto value = headers_arr[key].to_string();
+
+					params.headers[key_str] = value;
+				}
+			}
 		}
 	}
 
@@ -151,62 +206,26 @@ namespace http
 				if (va.size() > 0)
 				{
 					const auto options = va[0].as<scripting::array>();
-
-					const auto fields = options["parameters"];
-					const auto body = options["body"];
-					const auto headers = options["headers"];
-					const auto method = options["method"];
-
-					if (method.is<std::string>())
-					{
-						params.method = method.as<std::string>();
-					}
-
-					if (fields.is<scripting::array>())
-					{
-						const auto fields_ = fields.as<scripting::array>();
-						const auto keys = fields_.get_keys();
-
-						for (const auto& key : keys)
-						{
-							if (!key.is<std::string>())
-							{
-								continue;
-							}
-
-							const auto key_ = key.as<std::string>();
-							const auto value = fields_[key].to_string();
-							params.fields += key_ + "=" + value + "&";
-						}
-
-					}
-					else if (body.is<std::string>())
-					{
-						params.fields = body.as<std::string>();
-					}
-
-					if (headers.is<scripting::array>())
-					{
-						const auto headers_arr = headers.as<scripting::array>();
-						const auto keys = headers_arr.get_keys();
-
-						for (const auto& key : keys)
-						{
-							if (!key.is<std::string>())
-							{
-								continue;
-							}
-
-							const auto key_str = key.as<std::string>();
-							const auto value = headers_arr[key].to_string();
-
-							params.headers[key_str] = value;
-						}
-					}
+					parse_request_options(params, options);
 				}
 
 				return create_request(params);
 			});
+
+			gsc::function::add_multiple([](const std::string& url, const scripting::variadic_args& va)
+			{
+				http_request_params_t params{};
+				params.url = url;
+				params.method = "POST";
+
+				if (va.size() > 0)
+				{
+					const auto options = va[0].as<scripting::array>();
+					parse_request_options(params, options);
+				}
+
+				return create_request(params);
+			}, "httppost", "http::post");
 		}
 	};
 }

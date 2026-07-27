@@ -37,3 +37,9 @@
 [submodule "deps/date"]
 	path = deps/date
 	url = https://github.com/HowardHinnant/date
+[submodule "deps/libtommath"]
+	path = deps/libtommath
+	url = https://github.com/libtom/libtommath.git
+[submodule "deps/libtomcrypt"]
+	path = deps/libtomcrypt
+	url = https://github.com/libtom/libtomcrypt.git
