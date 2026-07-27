@@ -9,6 +9,8 @@
 
 namespace scheduler
 {
+	utils::thread_pool thread_pool;
+
 	namespace
 	{
 		utils::hook::detour server_frame_hook;
@@ -142,6 +144,9 @@ namespace scheduler
 	public:
 		void on_startup([[maybe_unused]] plugin::plugin* plugin) override
 		{
+			thread_pool.initialize(8);
+			thread_pool.start();
+
 			thread = std::thread([]()
 			{
 				while (!kill_thread)
@@ -156,6 +161,7 @@ namespace scheduler
 
 		void on_shutdown([[maybe_unused]] plugin::plugin* plugin) override
 		{
+			thread_pool.stop();
 			kill_thread = true;
 
 			if (thread.joinable())
