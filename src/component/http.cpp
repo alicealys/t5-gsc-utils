@@ -20,9 +20,10 @@ namespace http
 
 		struct http_request_params_t
 		{
+			std::string method;
 			std::string url;
 			std::string fields;
-			std::unordered_map<std::string, std::string> headers;
+			utils::http::headers headers;
 		};
 
 		struct http_request_t
@@ -91,7 +92,10 @@ namespace http
 			scheduler::thread_pool.push([request]
 			{
 				request->result = utils::http::get_data(
-					request->params.url, request->params.fields, request->params.headers);
+					request->params.url, 
+					request->params.fields, 
+					request->params.headers, 
+					request->params.method);
 				request->completed = true;
 			});
 
@@ -151,6 +155,12 @@ namespace http
 					const auto fields = options["parameters"];
 					const auto body = options["body"];
 					const auto headers = options["headers"];
+					const auto method = options["method"];
+
+					if (method.is<std::string>())
+					{
+						params.method = method.as<std::string>();
+					}
 
 					if (fields.is<scripting::array>())
 					{
