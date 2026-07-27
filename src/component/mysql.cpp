@@ -451,7 +451,7 @@ namespace mysql
 				});
 			});
 
-			gsc::function::add("mysql::query", [](const std::string& query)
+			gsc::function::add_multiple([](const std::string& query)
 			{
 				return create_mysql_query([=](database_t& db)
 				{
@@ -469,7 +469,7 @@ namespace mysql
 
 					return result;
 				});
-			});
+			}, "mysql::query", "mysql::execute");
 
 			gsc::function::add("mysql::prepared_statement", [](const std::string& query, const scripting::variadic_args& values)
 			{
@@ -520,7 +520,7 @@ namespace mysql
 					const auto handle = db->get_handle();
 					const auto stmt = mysql_stmt_init(handle);
 
-					if (mysql_stmt_prepare(stmt, query.data(), query.size()) != 0 || 
+					if (mysql_stmt_prepare(stmt, query.data(), query.size()) != 0 ||
 						mysql_stmt_bind_param(stmt, binds) != 0 ||
 						mysql_stmt_execute(stmt) != 0)
 					{
