@@ -13,24 +13,21 @@ namespace user_info
 	namespace
 	{
 		using user_info_map = std::unordered_map<std::string, std::string>;
-		std::unordered_map<int, user_info_map> user_info_overrides;
+		std::array<user_info_map, 18> user_info_overrides;
 
 		utils::hook::detour scr_shutdown_system_hook;
 
-		void clear_client_overrides(const int client_num)
+		void clear_client_overrides(unsigned int client_num)
 		{
 			user_info_overrides[client_num].clear();
 		}
 
 		void clear_all_overrides()
 		{
-			user_info_overrides.clear();
-		}
-
-		void client_disconnect_stub(const int client_num)
-		{
-			clear_client_overrides(client_num);
-			game::ClientDisconnect(client_num);
+			for (auto& entry : user_info_overrides)
+			{
+				entry.clear();
+			}
 		}
 
 		void scr_shutdown_system_stub(const game::scriptInstance_t inst, const unsigned char sys, const int b_complete)
@@ -44,11 +41,6 @@ namespace user_info
 			game::SV_GetUserinfo(index, buffer, buffer_size);
 
 			utils::info_string map(buffer);
-
-			if (!user_info_overrides.contains(index))
-			{
-				user_info_overrides[index] = {};
-			}
 
 			for (const auto& [key, val] : user_info_overrides[index])
 			{
@@ -75,7 +67,8 @@ namespace user_info
 			utils::hook::call(SELECT_VALUE(0x5D38EB, 0x4A75E2), sv_get_user_info_stub);
 			utils::hook::call(SELECT_VALUE(0x67FFE9, 0x548DB0), sv_get_user_info_stub);
 
-			utils::hook::call(SELECT_VALUE(0x4F3931, 0x5DC953), client_disconnect_stub);
+			plugin->get_interface()->callbacks()->on_player_connect(clear_client_overrides);
+			plugin->get_interface()->callbacks()->on_player_disconnect(clear_client_overrides);
 
 			scr_shutdown_system_hook.create(SELECT_VALUE(0x596D40, 0x540780), scr_shutdown_system_stub);
 
